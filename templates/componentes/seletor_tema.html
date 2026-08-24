@@ -1,0 +1,24 @@
+<details class="seletor-tema">
+  <summary class="botao-icone" aria-label="Personalizar tema">
+    <span aria-hidden="true">&#9680;</span>
+  </summary>
+  <div class="painel-tema">
+    <fieldset>
+      <legend>Paleta</legend>
+      <div class="opcoes-paleta">
+        <button type="button" data-tema-opcao="azul" aria-label="Tema azul"></button>
+        <button type="button" data-tema-opcao="esmeralda" aria-label="Tema esmeralda"></button>
+        <button type="button" data-tema-opcao="violeta" aria-label="Tema violeta"></button>
+        <button type="button" data-tema-opcao="rubi" aria-label="Tema rubi"></button>
+        <button type="button" data-tema-opcao="ambar" aria-label="Tema &acirc;mbar"></button>
+      </div>
+    </fieldset>
+    <label for="modo-tema">Luminosidade</label>
+    <select id="modo-tema" data-modo-tema>
+      <option value="CLARO">Claro</option>
+      <option value="ESCURO">Escuro</option>
+      <option value="SISTEMA">Sistema</option>
+    </select>
+    <p class="somente-leitor" data-estado-tema aria-live="polite"></p>
+  </div>
+</details>

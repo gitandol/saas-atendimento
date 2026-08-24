@@ -1,0 +1,19 @@
+<script>
+  (() => {
+    const temas = ["azul", "esmeralda", "violeta", "rubi", "ambar"];
+    const modos = ["CLARO", "ESCURO", "SISTEMA"];
+    try {
+      const salva = JSON.parse(localStorage.getItem("preferencia-visual") || "{}");
+      const tema = temas.includes(salva.tema) ? salva.tema : "azul";
+      const modo = modos.includes(salva.modo) ? salva.modo : "SISTEMA";
+      const escuro = modo === "ESCURO" ||
+        (modo === "SISTEMA" && matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.dataset.tema = tema;
+      document.documentElement.classList.toggle("dark", escuro);
+    } catch (_erro) {
+      const escuro = matchMedia("(prefers-color-scheme: dark)").matches;
+      document.documentElement.dataset.tema = "azul";
+      document.documentElement.classList.toggle("dark", escuro);
+    }
+  })();
+</script>

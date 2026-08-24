@@ -22,14 +22,14 @@
 
 ## Ciclo TDD
 
-- [ ] Testar que usuário autenticado recebe sidebar, topo, link Ajuda e seletor com exatamente cinco paletas.
-- [ ] Testar endpoint `PUT /api/v1/preferencias/visual` aceitando apenas os cinco temas e modos `CLARO`, `ESCURO`, `SISTEMA`.
-- [ ] Testar que preferência de outra empresa/usuário não pode ser alterada.
-- [ ] Confirmar falhas antes do modelo, view e templates.
-- [ ] Implementar tokens CSS sem duplicar classes por tema e script que aplica preferência antes da pintura da página para evitar flash.
-- [ ] Salvar preferência no `localStorage` para visitante; para autenticado, sincronizar com o endpoint Ninja, que delega persistência e auditoria ao service.
-- [ ] Validar teclado, foco visível, landmarks, `aria-expanded`, contraste AA e responsividade em 360, 768, 1280 e 1920 px.
-- [ ] Atualizar ajuda contextual e executar build CSS, testes e regressão.
+- [x] Testar que usuário autenticado recebe sidebar, topo, link Ajuda e seletor com exatamente cinco paletas.
+- [x] Testar endpoint `PUT /api/v1/preferencias/visual` aceitando apenas os cinco temas e modos `CLARO`, `ESCURO`, `SISTEMA`.
+- [x] Testar que preferência de outra empresa/usuário não pode ser alterada.
+- [x] Confirmar falhas antes do modelo, view e templates.
+- [x] Implementar tokens CSS sem duplicar classes por tema e script que aplica preferência antes da pintura da página para evitar flash.
+- [x] Salvar preferência no `localStorage` para visitante; para autenticado, sincronizar com o endpoint Ninja, que delega persistência e auditoria ao service.
+- [x] Validar teclado, foco visível, landmarks, `aria-expanded`, contraste AA e responsividade em 360, 768, 1280 e 1920 px.
+- [x] Atualizar ajuda contextual e executar build CSS, testes e regressão.
 
 ## Critérios de aceite
 
@@ -39,3 +39,13 @@
 - Componentes não possuem cores de negócio fixas fora dos tokens.
 
 **Commit sugerido:** `feat: adiciona layout responsivo e temas`
+
+## Registro de execução
+
+- Data: 2026-08-24.
+- TDD: falhas observadas antes da implementação para modelo/migração, páginas e componentes, endpoint, paletas escuras e comportamento JavaScript de tema/sidebar.
+- Implementação: shell administrativo responsivo, cinco paletas em claro/escuro, persistência local e sincronização autenticada com auditoria e isolamento por empresa.
+- Acessibilidade: landmarks, foco visível, estados `aria-expanded`/`inert`, navegação por teclado e contraste AA cobertos por testes automatizados; breakpoints cobrem 360, 768, 1280 e 1920 px.
+- Verificações: `npm run css:build`; `npm run test:js` (4 testes); `ruff check .`; `ruff format --check .`; `manage.py check`; `manage.py makemigrations --check --dry-run`; `pytest` (91 testes); `git diff --check`.
+- Observação: a inspeção visual interativa no navegador interno não pôde ser executada porque o processo do navegador foi bloqueado pelo sandbox; as verificações estruturais, responsivas e de acessibilidade foram executadas por testes.
+- Commit: `feat: adiciona layout responsivo e temas`.

@@ -1,13 +1,15 @@
 {% load static %}
 <!doctype html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-tema="azul">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block titulo %}Atendimento{% endblock %}</title>
+    {% include "componentes/tema_inicial.html" %}
     <link rel="stylesheet" href="{% static 'dist/css/aplicacao.css' %}">
+    <script src="{% static 'src/js/tema.js' %}" defer></script>
   </head>
-  <body class="min-h-screen bg-white text-slate-950 dark:bg-slate-950 dark:text-white">
+  <body class="min-h-screen" data-autenticado="false">
     <header class="border-b border-slate-200 p-4 dark:border-slate-800">
       <nav class="mx-auto flex max-w-6xl justify-between" aria-label="Principal">
         <a href="/">Atendimento</a>

@@ -1,0 +1,29 @@
+<header class="barra-superior">
+  <button
+    class="botao-icone abrir-sidebar"
+    type="button"
+    data-abrir-sidebar
+    aria-controls="sidebar"
+    aria-expanded="false"
+    aria-label="Abrir menu"
+  >
+    <span aria-hidden="true">&#9776;</span>
+  </button>
+  <form class="busca-global" role="search">
+    <label class="somente-leitor" for="busca-global">Buscar</label>
+    <input id="busca-global" type="search" placeholder="Buscar" autocomplete="off">
+  </form>
+  <div class="acoes-superiores">
+    {% include "componentes/seletor_tema.html" %}
+    <button class="botao-icone" type="button" aria-label="Notifica&ccedil;&otilde;es">
+      <span aria-hidden="true">&#9675;</span>
+    </button>
+    {% block ajuda %}
+      {% include "componentes/link_ajuda.html" with topico_ajuda="personalizacao-visual" %}
+    {% endblock %}
+    <a class="perfil-resumido" href="/perfil/">
+      <span class="avatar" aria-hidden="true">{{ request.user.email|first|upper }}</span>
+      <span class="perfil-email">{{ request.user.email }}</span>
+    </a>
+  </div>
+</header>

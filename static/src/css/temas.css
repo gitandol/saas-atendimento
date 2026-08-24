@@ -1,0 +1,99 @@
+:root {
+  color-scheme: light;
+  --cor-primaria: #1d4ed8;
+  --cor-em-primaria: #ffffff;
+  --cor-fundo: #f8fafc;
+  --cor-superficie: #ffffff;
+  --cor-texto: #172033;
+  --cor-texto-suave: #526077;
+  --cor-borda: #cbd5e1;
+  --cor-sucesso: #047857;
+  --cor-alerta: #a16207;
+  --cor-perigo: #be123c;
+  --cor-sobreposicao: rgb(15 23 42 / 58%);
+  --sombra: 0 12px 32px rgb(15 23 42 / 10%);
+}
+
+:root.dark {
+  color-scheme: dark;
+  --cor-fundo: #0b1120;
+  --cor-superficie: #111a2d;
+  --cor-texto: #f8fafc;
+  --cor-texto-suave: #b8c3d6;
+  --cor-borda: #40506a;
+  --cor-sucesso: #34d399;
+  --cor-alerta: #fbbf24;
+  --cor-perigo: #fb7185;
+  --cor-sobreposicao: rgb(0 0 0 / 72%);
+  --sombra: 0 12px 32px rgb(0 0 0 / 35%);
+}
+
+:root.dark[data-tema="azul"] {
+  --cor-primaria: #60a5fa;
+  --cor-em-primaria: #0b1120;
+}
+
+:root.dark[data-tema="esmeralda"] {
+  --cor-primaria: #34d399;
+  --cor-em-primaria: #0b1120;
+}
+
+:root.dark[data-tema="violeta"] {
+  --cor-primaria: #c4b5fd;
+  --cor-em-primaria: #0b1120;
+}
+
+:root.dark[data-tema="rubi"] {
+  --cor-primaria: #fb7185;
+  --cor-em-primaria: #0b1120;
+}
+
+:root.dark[data-tema="ambar"] {
+  --cor-primaria: #fbbf24;
+  --cor-em-primaria: #0b1120;
+}
+
+:root[data-tema="azul"] {
+  --cor-primaria: #1d4ed8;
+  --cor-em-primaria: #ffffff;
+}
+
+:root[data-tema="esmeralda"] {
+  --cor-primaria: #047857;
+  --cor-em-primaria: #ffffff;
+}
+
+:root[data-tema="violeta"] {
+  --cor-primaria: #6d28d9;
+  --cor-em-primaria: #ffffff;
+}
+
+:root[data-tema="rubi"] {
+  --cor-primaria: #be123c;
+  --cor-em-primaria: #ffffff;
+}
+
+:root[data-tema="ambar"] {
+  --cor-primaria: #92400e;
+  --cor-em-primaria: #ffffff;
+}
+
+[data-tema-opcao="azul"] {
+  --cor-amostra: #1d4ed8;
+}
+
+[data-tema-opcao="esmeralda"] {
+  --cor-amostra: #047857;
+}
+
+[data-tema-opcao="violeta"] {
+  --cor-amostra: #6d28d9;
+}
+
+[data-tema-opcao="rubi"] {
+  --cor-amostra: #be123c;
+}
+
+[data-tema-opcao="ambar"] {
+  --cor-amostra: #92400e;
+}

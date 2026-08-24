@@ -1,0 +1,28 @@
+{% load static %}
+<!doctype html>
+<html lang="pt-BR" data-tema="azul">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block titulo %}Atendimento{% endblock %}</title>
+    {% include "componentes/tema_inicial.html" %}
+    <link rel="stylesheet" href="{% static 'dist/css/aplicacao.css' %}">
+    <script src="{% static 'src/js/tema.js' %}" defer></script>
+    <script src="{% static 'src/js/sidebar.js' %}" defer></script>
+  </head>
+  <body data-autenticado="{{ request.user.is_authenticated|yesno:'true,false' }}">
+    <a class="pular-conteudo" href="#conteudo-principal">Pular para o conte&uacute;do</a>
+    <div class="aplicacao">
+      {% include "componentes/sidebar.html" %}
+      <div class="sobreposicao-sidebar" data-fechar-sidebar hidden></div>
+      <div class="area-principal">
+        {% include "componentes/barra_superior.html" %}
+        {% include "componentes/alertas.html" %}
+        <main id="conteudo-principal" class="conteudo-principal" tabindex="-1">
+          {% block conteudo %}{% endblock %}
+        </main>
+      </div>
+    </div>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

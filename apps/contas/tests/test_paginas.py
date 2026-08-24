@@ -5,6 +5,9 @@ from unittest.mock import patch
 import pytest
 from django.test import Client, RequestFactory
 
+from apps.contas.models import Usuario
+from apps.empresas.models import Empresa, MembroEmpresa
+
 
 @pytest.mark.django_db
 def test_pagina_de_login_renderiza_shell_publico() -> None:
@@ -20,6 +23,17 @@ def test_pagina_de_login_renderiza_shell_publico() -> None:
 
 
 @pytest.mark.django_db
+def test_shell_publico_aplica_preferencia_local_do_visitante() -> None:
+    """Carrega o tema local no shell publico sem exigir autenticacao."""
+    resposta = Client().get("/entrar/")
+
+    conteudo = resposta.content.decode()
+    assert 'data-tema="azul"' in conteudo
+    assert "preferencia-visual" in conteudo
+    assert 'src="/static/src/js/tema.js"' in conteudo
+
+
+@pytest.mark.django_db
 def test_pagina_de_perfil_renderiza_shell_da_api() -> None:
     """Disponibiliza shell cujo conteudo dinamico vem da API versionada."""
     resposta = Client().get("/perfil/")
@@ -27,6 +41,33 @@ def test_pagina_de_perfil_renderiza_shell_da_api() -> None:
     assert resposta.status_code == 200
     assert "contas/perfil.html" in [template.name for template in resposta.templates]
     assert b"/api/v1/perfil" in resposta.content
+
+
+@pytest.mark.django_db
+def test_usuario_autenticado_recebe_layout_e_cinco_paletas() -> None:
+    """Renderiza landmarks, ajuda e seletor completo no shell autenticado."""
+    empresa = Empresa.objects.create(nome="Empresa Layout")
+    usuario = Usuario.objects.create_user(email="layout@example.com", password="senha")
+    MembroEmpresa.objects.create(
+        usuario=usuario,
+        empresa=empresa,
+        papel=MembroEmpresa.Papel.ATENDENTE,
+    )
+    cliente = Client()
+    cliente.force_login(usuario)
+
+    resposta = cliente.get("/perfil/")
+
+    assert resposta.status_code == 200
+    conteudo = resposta.content.decode()
+    assert '<aside id="sidebar"' in conteudo
+    assert '<header class="barra-superior"' in conteudo
+    assert '<main id="conteudo-principal"' in conteudo
+    assert ">Ajuda<" in conteudo
+    assert conteudo.count("data-tema-opcao=") == 5
+    for tema in ("azul", "esmeralda", "violeta", "rubi", "ambar"):
+        assert f'data-tema-opcao="{tema}"' in conteudo
+    assert 'aria-expanded="false"' in conteudo
 
 
 def test_views_de_paginas_apenas_delegam_ao_render() -> None:

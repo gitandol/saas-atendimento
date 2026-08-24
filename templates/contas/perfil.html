@@ -1,44 +1,37 @@
-<!doctype html>
-<html lang="pt-br">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Perfil</title>
-</head>
-<body>
-  <main>
-    <h1>Perfil</h1>
-    <section id="perfil" aria-live="polite">Carregando...</section>
-    <button id="sair" type="button">Sair</button>
-  </main>
+{% extends "base.html" %}
+
+{% block titulo %}Perfil | Atendimento{% endblock %}
+
+{% block conteudo %}
+  <section class="cabecalho-pagina">
+    <div>
+      <p class="rotulo-pagina">Conta</p>
+      <h1>Perfil</h1>
+    </div>
+    <button id="sair" class="botao-secundario" type="button">Sair</button>
+  </section>
+  <section class="cartao" aria-labelledby="titulo-dados-perfil">
+    <h2 id="titulo-dados-perfil">Dados do perfil</h2>
+    <div id="perfil" aria-live="polite">Carregando...</div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
   <script>
     const painel = document.querySelector("#perfil");
-    const botaoSair = document.querySelector("#sair");
-
     async function carregarPerfil() {
       const resposta = await fetch("/api/v1/perfil");
-      if (!resposta.ok) {
-        window.location.assign("/entrar/?proximo=/perfil/");
-        return;
-      }
-
+      if (!resposta.ok) return window.location.assign("/entrar/?proximo=/perfil/");
       const perfil = await resposta.json();
       painel.textContent = perfil.nome + " - " + perfil.empresa_nome + " - " + perfil.papel;
     }
-
-    botaoSair.addEventListener("click", async () => {
-      const respostaCsrf = await fetch("/api/v1/autenticacao/csrf");
-      const dadosCsrf = await respostaCsrf.json();
+    document.querySelector("#sair").addEventListener("click", async () => {
+      const csrf = await fetch("/api/v1/autenticacao/csrf").then((resposta) => resposta.json());
       const resposta = await fetch("/api/v1/autenticacao/logout", {
-        method: "POST",
-        headers: {"X-CSRFToken": dadosCsrf.csrf_token}
+        method: "POST", headers: {"X-CSRFToken": csrf.csrf_token}
       });
-      if (resposta.ok) {
-        window.location.assign("/entrar/");
-      }
+      if (resposta.ok) window.location.assign("/entrar/");
     });
-
     carregarPerfil();
   </script>
-</body>
-</html>
+{% endblock %}

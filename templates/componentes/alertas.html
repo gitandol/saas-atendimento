@@ -1,0 +1,5 @@
+<section class="regiao-alertas" aria-label="Alertas" aria-live="polite">
+  {% for message in messages %}
+    <div class="alerta" role="status">{{ message }}</div>
+  {% endfor %}
+</section>
