@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ajuda</title>
+  </head>
+  <body>
+    <main id="topico-ajuda" data-endpoint="/api/v1/ajuda/{{ slug }}">
+      <article id="conteudo-ajuda"></article>
+      <p>Atualizado em <time data-atualizado-em></time></p>
+    </main>
+    <script>
+      const raiz = document.querySelector("#topico-ajuda");
+      fetch(raiz.dataset.endpoint, {credentials: "same-origin"})
+        .then((resposta) => resposta.json().then((dados) => ({resposta, dados})))
+        .then(({resposta, dados}) => {
+          if (!resposta.ok) throw new Error(dados.mensagem || "Falha ao carregar.");
+          document.title = `${dados.titulo} - Ajuda`;
+          document.querySelector("#conteudo-ajuda").innerHTML = dados.html;
+          const data = new Date(dados.atualizado_em);
+          const elemento = document.querySelector("[data-atualizado-em]");
+          elemento.dateTime = dados.atualizado_em;
+          elemento.textContent = data.toLocaleString("pt-BR");
+        })
+        .catch((erro) => { document.querySelector("#conteudo-ajuda").textContent = erro.message; });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Historico de auditoria</title>
+  </head>
+  <body>
+    <header>
+      <h1>Historico de auditoria</h1>
+      {% include "componentes/link_ajuda.html" with topico_ajuda="visao-geral" %}
+    </header>
+    <main id="historico" data-endpoint="/api/v1/auditoria/historico">
+      <p id="estado">Carregando historico...</p>
+      <ul id="eventos"></ul>
+    </main>
+    <script>
+      const raiz = document.querySelector("#historico");
+      fetch(raiz.dataset.endpoint, {credentials: "same-origin"})
+        .then((resposta) => resposta.json().then((dados) => ({resposta, dados})))
+        .then(({resposta, dados}) => {
+          if (!resposta.ok) throw new Error(dados.mensagem || "Falha ao carregar.");
+          document.querySelector("#estado").textContent = `${dados.total} evento(s)`;
+          document.querySelector("#eventos").innerHTML = dados.itens
+            .map((item) => `<li>${item.acao} - ${item.tipo_objeto} #${item.revisao_numero}</li>`)
+            .join("");
+        })
+        .catch((erro) => { document.querySelector("#estado").textContent = erro.message; });
+    </script>
+  </body>
+</html>

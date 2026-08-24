@@ -8,6 +8,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpRequest, HttpResponse
 from ninja import NinjaAPI, Schema
 
+from apps.ajuda.api.router import router as ajuda_router
+from apps.auditoria.api.router import router as auditoria_router
 from apps.contas.api.router import router as contas_router
 from apps.nucleo.api.router import router as nucleo_router
 
@@ -29,6 +31,8 @@ api = NinjaAPI(
 )
 api.add_router("", contas_router)
 api.add_router("", nucleo_router)
+api.add_router("/auditoria", auditoria_router)
+api.add_router("/ajuda", ajuda_router)
 
 
 @api.exception_handler(Exception)

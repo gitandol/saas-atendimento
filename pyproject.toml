@@ -44,12 +44,17 @@ name = "Camadas HTTP nao importam models"
 type = "forbidden"
 allow_indirect_imports = true
 source_modules = [
+    "apps.ajuda.api",
+    "apps.ajuda.views",
+    "apps.auditoria.api",
+    "apps.auditoria.views",
     "apps.contas.api",
     "apps.contas.views",
     "apps.nucleo.api",
     "apps.nucleo.views",
 ]
 forbidden_modules = [
+    "apps.auditoria.models",
     "apps.contas.models",
     "apps.empresas.models",
     "apps.nucleo.models",
@@ -59,11 +64,17 @@ forbidden_modules = [
 name = "Services nao importam fronteiras HTTP"
 type = "forbidden"
 source_modules = [
+    "apps.ajuda.services",
+    "apps.auditoria.services",
     "apps.contas.services",
     "apps.empresas.services",
     "apps.nucleo.services",
 ]
 forbidden_modules = [
+    "apps.ajuda.api",
+    "apps.ajuda.views",
+    "apps.auditoria.api",
+    "apps.auditoria.views",
     "apps.contas.api",
     "apps.contas.views",
     "apps.nucleo.api",
