@@ -8,6 +8,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpRequest, HttpResponse
 from ninja import NinjaAPI, Schema
 
+from apps.contas.api.router import router as contas_router
 from apps.nucleo.api.router import router as nucleo_router
 
 
@@ -26,6 +27,7 @@ api = NinjaAPI(
     docs_url="/docs",
     docs_decorator=staff_member_required if settings.DOCS_AUTENTICADA else None,
 )
+api.add_router("", contas_router)
 api.add_router("", nucleo_router)
 
 

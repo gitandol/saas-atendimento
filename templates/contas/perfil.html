@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Perfil</title>
+</head>
+<body>
+  <main>
+    <h1>Perfil</h1>
+    <section id="perfil" aria-live="polite">Carregando...</section>
+    <button id="sair" type="button">Sair</button>
+  </main>
+  <script>
+    const painel = document.querySelector("#perfil");
+    const botaoSair = document.querySelector("#sair");
+
+    async function carregarPerfil() {
+      const resposta = await fetch("/api/v1/perfil");
+      if (!resposta.ok) {
+        window.location.assign("/entrar/?proximo=/perfil/");
+        return;
+      }
+
+      const perfil = await resposta.json();
+      painel.textContent = perfil.nome + " - " + perfil.empresa_nome + " - " + perfil.papel;
+    }
+
+    botaoSair.addEventListener("click", async () => {
+      const respostaCsrf = await fetch("/api/v1/autenticacao/csrf");
+      const dadosCsrf = await respostaCsrf.json();
+      const resposta = await fetch("/api/v1/autenticacao/logout", {
+        method: "POST",
+        headers: {"X-CSRFToken": dadosCsrf.csrf_token}
+      });
+      if (resposta.ok) {
+        window.location.assign("/entrar/");
+      }
+    });
+
+    carregarPerfil();
+  </script>
+</body>
+</html>

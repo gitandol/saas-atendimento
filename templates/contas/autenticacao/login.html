@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entrar</title>
+</head>
+<body>
+  <main>
+    <h1>Entrar</h1>
+    <form id="form-login">
+      <label for="email">E-mail</label>
+      <input id="email" name="email" type="email" autocomplete="email" required>
+      <label for="senha">Senha</label>
+      <input id="senha" name="senha" type="password" autocomplete="current-password" required>
+      <button type="submit">Entrar</button>
+      <p id="erro-login" role="alert"></p>
+    </form>
+  </main>
+  <script>
+    const formulario = document.querySelector("#form-login");
+    const erroLogin = document.querySelector("#erro-login");
+
+    formulario.addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+      erroLogin.textContent = "";
+
+      const respostaCsrf = await fetch("/api/v1/autenticacao/csrf");
+      const dadosCsrf = await respostaCsrf.json();
+      const parametros = new URLSearchParams(window.location.search);
+      const resposta = await fetch("/api/v1/autenticacao/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": dadosCsrf.csrf_token
+        },
+        body: JSON.stringify({
+          email: formulario.email.value,
+          senha: formulario.senha.value,
+          proximo: parametros.get("proximo")
+        })
+      });
+      const dados = await resposta.json();
+
+      if (!resposta.ok) {
+        erroLogin.textContent = dados.mensagem || "Nao foi possivel entrar.";
+        return;
+      }
+      window.location.assign(dados.redirecionar_para);
+    });
+  </script>
+</body>
+</html>

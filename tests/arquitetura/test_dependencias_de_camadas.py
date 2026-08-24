@@ -2,6 +2,7 @@
 
 import ast
 import subprocess
+import tomllib
 from pathlib import Path
 
 import pytest
@@ -58,3 +59,22 @@ def test_services_nao_importam_api_ou_views() -> None:
         modulo for modulo in importacoes if ".api" in modulo or ".views" in modulo
     }
     assert proibidas == set()
+
+
+def test_contratos_declaram_apps_de_contas_e_empresas() -> None:
+    """Mantem novos dominios cobertos pelos limites do import-linter."""
+    with Path("pyproject.toml").open("rb") as arquivo:
+        contratos = tomllib.load(arquivo)["tool"]["importlinter"]["contracts"]
+
+    fontes_por_nome = {
+        contrato["name"]: set(contrato["source_modules"]) for contrato in contratos
+    }
+
+    assert fontes_por_nome["Camadas HTTP nao importam models"] >= {
+        "apps.contas.api",
+        "apps.contas.views",
+    }
+    assert fontes_por_nome["Services nao importam fronteiras HTTP"] >= {
+        "apps.contas.services",
+        "apps.empresas.services",
+    }

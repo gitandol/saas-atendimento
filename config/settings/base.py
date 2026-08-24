@@ -20,7 +20,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "apps.contas",
+    "apps.empresas",
 ]
+
+AUTH_USER_MODEL = "contas.Usuario"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -29,6 +33,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.empresas.middleware.empresa_ativa.EmpresaAtivaMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]

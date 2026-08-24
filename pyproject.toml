@@ -26,7 +26,7 @@ dev = [
 [tool.ruff]
 line-length = 88
 target-version = "py313"
-extend-exclude = ["tarefas"]
+extend-exclude = ["tarefas", ".superpowers", "docs/superpowers"]
 
 [tool.ruff.lint]
 select = ["B", "D", "E", "F", "I", "UP"]
@@ -34,6 +34,7 @@ ignore = ["D203", "D213", "D401"]
 
 [tool.ruff.lint.per-file-ignores]
 "config/settings/*.py" = ["F403", "F405"]
+"apps/*/migrations/*.py" = ["E501"]
 
 [tool.importlinter]
 root_packages = ["apps"]
@@ -42,11 +43,29 @@ root_packages = ["apps"]
 name = "Camadas HTTP nao importam models"
 type = "forbidden"
 allow_indirect_imports = true
-source_modules = ["apps.nucleo.api", "apps.nucleo.views"]
-forbidden_modules = ["apps.nucleo.models"]
+source_modules = [
+    "apps.contas.api",
+    "apps.contas.views",
+    "apps.nucleo.api",
+    "apps.nucleo.views",
+]
+forbidden_modules = [
+    "apps.contas.models",
+    "apps.empresas.models",
+    "apps.nucleo.models",
+]
 
 [[tool.importlinter.contracts]]
 name = "Services nao importam fronteiras HTTP"
 type = "forbidden"
-source_modules = ["apps.nucleo.services"]
-forbidden_modules = ["apps.nucleo.api", "apps.nucleo.views"]
+source_modules = [
+    "apps.contas.services",
+    "apps.empresas.services",
+    "apps.nucleo.services",
+]
+forbidden_modules = [
+    "apps.contas.api",
+    "apps.contas.views",
+    "apps.nucleo.api",
+    "apps.nucleo.views",
+]
