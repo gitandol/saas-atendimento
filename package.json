@@ -1,0 +1,12 @@
+{
+  "name": "saas-atendimento",
+  "private": true,
+  "scripts": {
+    "css:dev": "tailwindcss -i ./static/src/css/aplicacao.css -o ./static/dist/css/aplicacao.css --watch",
+    "css:build": "tailwindcss -i ./static/src/css/aplicacao.css -o ./static/dist/css/aplicacao.css --minify"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.0",
+    "tailwindcss": "^4.1.0"
+  }
+}
