@@ -13,3 +13,4 @@ staticfiles/
 *.log
 .idea/
 .superpowers/
+.worktrees/
