@@ -26,13 +26,27 @@ def test_pagina_documentos_consume_api_e_exibe_estados_e_ajuda() -> None:
     resposta = _cliente_autenticado("pagina-doc@example.com").get("/ia/conhecimentos/")
     assert resposta.status_code == 200
     assert b'hx-get="/api/v1/ia/conhecimentos"' in resposta.content
-    assert b'hx-post="/api/v1/ia/conhecimentos"' in resposta.content
-    assert b'hx-put="/api/v1/ia/conhecimentos/__id__"' in resposta.content
     assert b'hx-delete="/api/v1/ia/conhecimentos/__id__"' in resposta.content
     assert b"Carregando conhecimentos" in resposta.content
     assert b"Nenhum conhecimento cadastrado" in resposta.content
     assert b"Nao foi possivel carregar" in resposta.content
     assert b"/ajuda/base-de-conhecimento/" in resposta.content
+
+
+@pytest.mark.django_db
+def test_pagina_documentos_usa_modal_e_tabela_somente_quando_ha_dados() -> None:
+    """Mantem o cadastro no modal e separa tabela do estado vazio."""
+    resposta = _cliente_autenticado("layout-doc@example.com").get("/ia/conhecimentos/")
+
+    assert resposta.status_code == 200
+    assert b'id="abrir-modal-conhecimento"' in resposta.content
+    assert b'class="botao-novo-conhecimento"' in resposta.content
+    assert b'<dialog id="modal-conhecimento"' in resposta.content
+    assert b'id="formulario-conhecimento"' in resposta.content
+    assert b'<table id="tabela-conhecimentos"' in resposta.content
+    assert b'<tbody id="corpo-tabela-conhecimentos">' in resposta.content
+    assert b'id="estado-vazio-conhecimentos"' in resposta.content
+    assert b"dados.total === 0" in resposta.content
 
 
 @pytest.mark.django_db

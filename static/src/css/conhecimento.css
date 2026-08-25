@@ -1,0 +1,169 @@
+.cabecalho-conhecimento {
+  align-items: flex-end;
+}
+
+.acoes-cabecalho-conhecimento {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.botao-novo-conhecimento {
+  min-height: 2.75rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--cor-primaria);
+  border-radius: 0.55rem;
+  background: var(--cor-primaria);
+  color: var(--cor-em-primaria);
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.painel-conhecimentos {
+  min-height: 12rem;
+}
+
+.estado-vazio-conhecimentos,
+.estado-erro-conhecimentos,
+.painel-conhecimentos > [data-estado="carregando"] {
+  min-height: 9rem;
+  place-content: center;
+  margin: 0;
+  color: var(--cor-texto-suave);
+  text-align: center;
+}
+
+.estado-vazio-conhecimentos:not([hidden]),
+.estado-erro-conhecimentos:not([hidden]),
+.painel-conhecimentos > [data-estado="carregando"]:not([hidden]) {
+  display: grid;
+}
+
+.tabela-responsiva {
+  overflow-x: auto;
+}
+
+#tabela-conhecimentos {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#tabela-conhecimentos th,
+#tabela-conhecimentos td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--cor-borda);
+  text-align: left;
+  vertical-align: middle;
+}
+
+#tabela-conhecimentos th {
+  color: var(--cor-texto-suave);
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+#tabela-conhecimentos tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.conteudo-resumido {
+  max-width: 34rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-conhecimento {
+  display: inline-flex;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cor-alerta) 14%, transparent);
+  color: var(--cor-texto-suave);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.status-conhecimento[data-ativo="true"] {
+  background: color-mix(in srgb, var(--cor-primaria) 16%, transparent);
+  color: var(--cor-primaria);
+}
+
+.acoes-linha-conhecimento {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+#modal-conhecimento {
+  width: min(calc(100% - 2rem), 44rem);
+  max-height: calc(100vh - 2rem);
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--cor-borda);
+  border-radius: 1rem;
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+  box-shadow: var(--sombra);
+}
+
+#modal-conhecimento::backdrop {
+  background: var(--cor-sobreposicao);
+  backdrop-filter: blur(4px);
+}
+
+#formulario-conhecimento {
+  padding: clamp(1rem, 3vw, 1.5rem);
+}
+
+.cabecalho-modal-conhecimento,
+.acoes-modal-conhecimento {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cabecalho-modal-conhecimento h2 {
+  margin: 0.2rem 0 0;
+}
+
+.fechar-modal-conhecimento {
+  min-width: 2.5rem;
+  padding: 0.35rem;
+  border-color: var(--cor-borda) !important;
+  background: transparent !important;
+  color: var(--cor-texto) !important;
+  font-size: 1.5rem;
+}
+
+.campo-conteudo-conhecimento {
+  grid-column: 1 / -1;
+}
+
+.acoes-modal-conhecimento {
+  justify-content: flex-end;
+}
+
+.acoes-modal-conhecimento .botao-secundario {
+  border-color: var(--cor-borda);
+  background: var(--cor-superficie-interna);
+  color: var(--cor-texto);
+}
+
+@media (max-width: 767px) {
+  .cabecalho-conhecimento {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .acoes-cabecalho-conhecimento {
+    justify-content: space-between;
+  }
+
+  .conteudo-resumido {
+    max-width: 16rem;
+  }
+}
