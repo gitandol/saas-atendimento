@@ -59,3 +59,34 @@ def test_cor_primaria_dark_atende_contraste_wcag_aa(tema: str) -> None:
 
     assert _contraste(primaria, superficie) >= 4.5
     assert _contraste(primaria, sobre_primaria) >= 4.5
+
+
+@pytest.mark.parametrize("seletor", [":root", ":root.dark"])
+def test_tema_define_superficie_interna_e_brilho(seletor: str) -> None:
+    """Exige os tokens consumidos por cartoes internos e decoracoes."""
+    css = Path("static/src/css/temas.css").read_text(encoding="utf-8")
+    bloco = _bloco(css, seletor)
+
+    assert re.search(r"--cor-superficie-interna:\s*#[0-9a-fA-F]{6}", bloco)
+    assert "--cor-brilho:" in bloco
+
+
+@pytest.mark.parametrize(
+    ("prefixo", "superficie"),
+    [("", "#ffffff"), (".dark", "#151a17")],
+)
+@pytest.mark.parametrize("tema", ["azul", "esmeralda", "violeta", "rubi", "ambar"])
+def test_paleta_vibrante_atende_contraste_wcag_aa(
+    prefixo: str,
+    superficie: str,
+    tema: str,
+) -> None:
+    """Mantem primaria legivel na superficie e no proprio botao."""
+    css = Path("static/src/css/temas.css").read_text(encoding="utf-8")
+    seletor = f':root{prefixo}[data-tema="{tema}"]'
+    bloco = _bloco(css, seletor)
+    primaria = _token(bloco, "cor-primaria")
+    sobre_primaria = _token(bloco, "cor-em-primaria")
+
+    assert _contraste(primaria, superficie) >= 4.5
+    assert _contraste(primaria, sobre_primaria) >= 4.5

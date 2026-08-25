@@ -1,12 +1,14 @@
 :root {
   color-scheme: light;
-  --cor-primaria: #1d4ed8;
+  --cor-primaria: #0369a1;
   --cor-em-primaria: #ffffff;
-  --cor-fundo: #f8fafc;
+  --cor-fundo: #f4f6f3;
   --cor-superficie: #ffffff;
-  --cor-texto: #172033;
-  --cor-texto-suave: #526077;
-  --cor-borda: #cbd5e1;
+  --cor-superficie-interna: #eef1ed;
+  --cor-texto: #161a17;
+  --cor-texto-suave: #59615b;
+  --cor-borda: #c8cec9;
+  --cor-brilho: color-mix(in srgb, var(--cor-primaria) 18%, transparent);
   --cor-sucesso: #047857;
   --cor-alerta: #a16207;
   --cor-perigo: #be123c;
@@ -16,11 +18,13 @@
 
 :root.dark {
   color-scheme: dark;
-  --cor-fundo: #0b1120;
-  --cor-superficie: #111a2d;
-  --cor-texto: #f8fafc;
-  --cor-texto-suave: #b8c3d6;
-  --cor-borda: #40506a;
+  --cor-fundo: #080b09;
+  --cor-superficie: #151a17;
+  --cor-superficie-interna: #0e120f;
+  --cor-texto: #f4f7f3;
+  --cor-texto-suave: #a7b0a9;
+  --cor-borda: #303732;
+  --cor-brilho: color-mix(in srgb, var(--cor-primaria) 24%, transparent);
   --cor-sucesso: #34d399;
   --cor-alerta: #fbbf24;
   --cor-perigo: #fb7185;
@@ -29,37 +33,37 @@
 }
 
 :root.dark[data-tema="azul"] {
-  --cor-primaria: #60a5fa;
-  --cor-em-primaria: #0b1120;
+  --cor-primaria: #38bdf8;
+  --cor-em-primaria: #080b09;
 }
 
 :root.dark[data-tema="esmeralda"] {
-  --cor-primaria: #34d399;
-  --cor-em-primaria: #0b1120;
+  --cor-primaria: #a3e635;
+  --cor-em-primaria: #080b09;
 }
 
 :root.dark[data-tema="violeta"] {
-  --cor-primaria: #c4b5fd;
-  --cor-em-primaria: #0b1120;
+  --cor-primaria: #a78bfa;
+  --cor-em-primaria: #080b09;
 }
 
 :root.dark[data-tema="rubi"] {
   --cor-primaria: #fb7185;
-  --cor-em-primaria: #0b1120;
+  --cor-em-primaria: #080b09;
 }
 
 :root.dark[data-tema="ambar"] {
   --cor-primaria: #fbbf24;
-  --cor-em-primaria: #0b1120;
+  --cor-em-primaria: #080b09;
 }
 
 :root[data-tema="azul"] {
-  --cor-primaria: #1d4ed8;
+  --cor-primaria: #0369a1;
   --cor-em-primaria: #ffffff;
 }
 
 :root[data-tema="esmeralda"] {
-  --cor-primaria: #047857;
+  --cor-primaria: #3f6212;
   --cor-em-primaria: #ffffff;
 }
 
@@ -79,11 +83,11 @@
 }
 
 [data-tema-opcao="azul"] {
-  --cor-amostra: #1d4ed8;
+  --cor-amostra: #0369a1;
 }
 
 [data-tema-opcao="esmeralda"] {
-  --cor-amostra: #047857;
+  --cor-amostra: #3f6212;
 }
 
 [data-tema-opcao="violeta"] {
