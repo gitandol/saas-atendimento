@@ -68,6 +68,10 @@ def test_usuario_autenticado_recebe_layout_e_cinco_paletas() -> None:
     for tema in ("azul", "esmeralda", "violeta", "rubi", "ambar"):
         assert f'data-tema-opcao="{tema}"' in conteudo
     assert 'aria-expanded="false"' in conteudo
+    assert 'class="conteudo-principal conteudo-limitado"' in conteudo
+    assert 'class="marca-descricao sidebar-rotulo"' in conteudo
+    assert "item-navegacao-ativo" in conteudo
+    assert 'aria-current="page"' in conteudo
 
 
 def test_views_de_paginas_apenas_delegam_ao_render() -> None:

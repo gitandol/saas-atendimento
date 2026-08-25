@@ -1,14 +1,17 @@
 <aside id="sidebar" class="sidebar" aria-label="Navega&ccedil;&atilde;o principal">
   <div class="marca">
     <span class="marca-simbolo" aria-hidden="true">A</span>
-    <span class="sidebar-rotulo">Atendimento</span>
+    <span class="marca-identidade sidebar-rotulo">
+      <strong>Atendimento</strong>
+      <span class="marca-descricao sidebar-rotulo">Central de conversas</span>
+    </span>
   </div>
   <nav aria-label="Principal">
-    <a class="item-navegacao" href="/perfil/">
+    <a class="item-navegacao{% if request.path == "/perfil/" %} item-navegacao-ativo{% endif %}" href="/perfil/"{% if request.path == "/perfil/" %} aria-current="page"{% endif %}>
       <span aria-hidden="true">&#9679;</span>
       <span class="sidebar-rotulo">Perfil</span>
     </a>
-    <a class="item-navegacao" href="/auditoria/">
+    <a class="item-navegacao{% if "/auditoria/" in request.path %} item-navegacao-ativo{% endif %}" href="/auditoria/historico/"{% if "/auditoria/" in request.path %} aria-current="page"{% endif %}>
       <span aria-hidden="true">&#9716;</span>
       <span class="sidebar-rotulo">Auditoria</span>
     </a>

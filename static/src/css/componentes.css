@@ -528,6 +528,94 @@ a {
   display: none;
 }
 
+.sidebar {
+  border-color: color-mix(in srgb, var(--cor-borda) 72%, transparent);
+  background: color-mix(in srgb, var(--cor-fundo) 70%, var(--cor-superficie));
+  box-shadow: 14px 0 45px color-mix(in srgb, var(--cor-fundo) 70%, transparent);
+}
+
+.marca-identidade {
+  display: grid;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.marca-descricao {
+  margin-top: 0.2rem;
+  color: var(--cor-texto-suave);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.item-navegacao {
+  border: 1px solid transparent;
+}
+
+.item-navegacao-ativo {
+  border-color: color-mix(in srgb, var(--cor-primaria) 24%, transparent);
+  background: color-mix(in srgb, var(--cor-primaria) 14%, var(--cor-superficie));
+  color: var(--cor-primaria);
+}
+
+.barra-superior {
+  min-height: 4rem;
+  border-color: color-mix(in srgb, var(--cor-borda) 72%, transparent);
+  background: color-mix(in srgb, var(--cor-fundo) 82%, transparent);
+  box-shadow: 0 10px 35px color-mix(in srgb, var(--cor-fundo) 48%, transparent);
+}
+
+.busca-global input,
+.painel-tema select {
+  background: var(--cor-superficie-interna);
+}
+
+.botao-icone,
+.botao-secundario {
+  background: color-mix(in srgb, var(--cor-superficie) 88%, var(--cor-fundo));
+}
+
+.conteudo-limitado {
+  width: min(100%, 78rem);
+  margin-inline: auto;
+}
+
+.cabecalho-pagina {
+  margin-bottom: clamp(1.25rem, 3vw, 2rem);
+}
+
+.cabecalho-pagina h1 {
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  letter-spacing: -0.04em;
+}
+
+.cartao {
+  border-color: color-mix(in srgb, var(--cor-borda) 82%, var(--cor-primaria));
+  box-shadow:
+    var(--sombra),
+    0 0 45px color-mix(in srgb, var(--cor-brilho) 42%, transparent);
+}
+
+.cartao-destaque {
+  background: var(--cor-superficie);
+}
+
+.cartao-destaque > :not(h2) {
+  padding: 1rem;
+  border: 1px solid color-mix(in srgb, var(--cor-borda) 76%, transparent);
+  border-radius: 0.8rem;
+  background: var(--cor-superficie-interna);
+}
+
+.cartao-destaque h2 {
+  margin-bottom: 1rem;
+}
+
+.lista-eventos {
+  display: grid;
+  gap: 0.65rem;
+  padding-left: 2.25rem;
+}
+
 @media (min-width: 768px) {
   .grade-login {
     grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 28rem);
