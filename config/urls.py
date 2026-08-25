@@ -14,5 +14,6 @@ urlpatterns = [
     path("perfil/", pagina_perfil, name="perfil"),
     path("auditoria/", include("apps.auditoria.urls")),
     path("empresa/", include("apps.empresas.urls.paginas")),
+    path("ia/", include("apps.ia.urls")),
     path("ajuda/", include("apps.ajuda.urls")),
 ]

@@ -3,6 +3,7 @@
 from config.settings.base import *  # noqa: F403
 
 SECRET_KEY = "segredo-apenas-para-testes"
+IA_CHAVE_CRIPTOGRAFIA = "segredo-ia-apenas-para-testes"
 DEBUG = False
 STATIC_ROOT = None
 CACHES = {

@@ -15,6 +15,10 @@
       <span aria-hidden="true">&#9881;</span>
       <span class="sidebar-rotulo">Empresa</span>
     </a>
+    <a class="item-navegacao{% if "/ia/" in request.path %} item-navegacao-ativo{% endif %}" href="/ia/configuracao/"{% if "/ia/" in request.path %} aria-current="page"{% endif %}>
+      <span aria-hidden="true">&#10024;</span>
+      <span class="sidebar-rotulo">IA</span>
+    </a>
     <a class="item-navegacao{% if "/auditoria/" in request.path %} item-navegacao-ativo{% endif %}" href="/auditoria/historico/"{% if "/auditoria/" in request.path %} aria-current="page"{% endif %}>
       <span aria-hidden="true">&#9716;</span>
       <span class="sidebar-rotulo">Auditoria</span>

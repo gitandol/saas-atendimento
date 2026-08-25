@@ -5,10 +5,12 @@ description = "Plataforma SaaS de atendimento por WhatsApp com IA."
 requires-python = ">=3.13"
 dependencies = [
     "celery[redis]>=5.6,<5.7",
+    "cryptography>=45,<46",
     "django>=5.2,<5.3",
     "django-ninja>=1.4,<2",
     "gunicorn>=23,<24",
     "psycopg[binary]>=3.2,<4",
+    "requests>=2.32,<3",
     "whitenoise>=6.8,<7",
 ]
 
@@ -52,6 +54,8 @@ source_modules = [
     "apps.contas.views",
     "apps.empresas.api",
     "apps.empresas.views",
+    "apps.ia.api",
+    "apps.ia.views",
     "apps.nucleo.api",
     "apps.nucleo.views",
 ]
@@ -59,6 +63,7 @@ forbidden_modules = [
     "apps.auditoria.models",
     "apps.contas.models",
     "apps.empresas.models",
+    "apps.ia.models",
     "apps.nucleo.models",
 ]
 
@@ -70,6 +75,7 @@ source_modules = [
     "apps.auditoria.services",
     "apps.contas.services",
     "apps.empresas.services",
+    "apps.ia.services",
     "apps.nucleo.services",
 ]
 forbidden_modules = [
@@ -81,4 +87,6 @@ forbidden_modules = [
     "apps.contas.views",
     "apps.nucleo.api",
     "apps.nucleo.views",
+    "apps.ia.api",
+    "apps.ia.views",
 ]

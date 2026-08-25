@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "apps.empresas",
     "apps.auditoria",
     "apps.ajuda",
+    "apps.ia",
 ]
 
 AUTH_USER_MODEL = "contas.Usuario"
@@ -111,3 +112,4 @@ CELERY_TASK_TIME_LIMIT = 300
 
 DOCS_AUTENTICADA = True
 LOGIN_URL = "/admin/login/"
+IA_CHAVE_CRIPTOGRAFIA = os.getenv("IA_CHAVE_CRIPTOGRAFIA", "")

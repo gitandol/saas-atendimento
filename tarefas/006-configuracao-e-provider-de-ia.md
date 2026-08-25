@@ -33,16 +33,16 @@ class ProviderIA(Protocol):
 
 ## Ciclo TDD
 
-- [ ] Testar uma única configuração por empresa, campos `modelo`, `nome_assistente`, `personalidade`, `mensagem_saudacao`, `mensagem_falha` e `respostas_automaticas_ativas`.
-- [ ] Testar criptografia em repouso: valor persistido difere da chave e a chave nunca aparece em `repr`, respostas, auditoria ou logs.
-- [ ] Testar provider com cliente HTTP mockado: sucesso, timeout, 401, 429, resposta vazia e payload inválido.
-- [ ] Testar endpoints de consulta, atualização e conexão sem salvar credencial vazia ou devolver segredo existente ao navegador.
-- [ ] Confirmar falhas antes da implementação.
-- [ ] Implementar `ProviderIA` e `ProviderOpenAI` usando timeout explícito e exceções de domínio `CredencialIAInvalida`, `LimiteIAExcedido`, `IAIndisponivel`.
-- [ ] Implementar services de consulta, edição e teste em que campo de chave vazio preserva a chave atual e ação separada permite removê-la.
-- [ ] Criar página-shell que carrega e envia configurações pela API; o endpoint não instancia models ou provider diretamente.
-- [ ] Testar schemas `422`, autenticação `401/403`, indisponibilidade `503` e limite externo `429` com corpo de erro padronizado.
-- [ ] Auditar alterações com segredo sanitizado, criar ajuda e executar regressão.
+- [x] Testar uma única configuração por empresa, campos `modelo`, `nome_assistente`, `personalidade`, `mensagem_saudacao`, `mensagem_falha` e `respostas_automaticas_ativas`.
+- [x] Testar criptografia em repouso: valor persistido difere da chave e a chave nunca aparece em `repr`, respostas, auditoria ou logs.
+- [x] Testar provider com cliente HTTP mockado: sucesso, timeout, 401, 429, resposta vazia e payload inválido.
+- [x] Testar endpoints de consulta, atualização e conexão sem salvar credencial vazia ou devolver segredo existente ao navegador.
+- [x] Confirmar falhas antes da implementação.
+- [x] Implementar `ProviderIA` e `ProviderOpenAI` usando timeout explícito e exceções de domínio `CredencialIAInvalida`, `LimiteIAExcedido`, `IAIndisponivel`.
+- [x] Implementar services de consulta, edição e teste em que campo de chave vazio preserva a chave atual e ação separada permite removê-la.
+- [x] Criar página-shell que carrega e envia configurações pela API; o endpoint não instancia models ou provider diretamente.
+- [x] Testar schemas `422`, autenticação `401/403`, indisponibilidade `503` e limite externo `429` com corpo de erro padronizado.
+- [x] Auditar alterações com segredo sanitizado, criar ajuda e executar regressão.
 
 ## Critérios de aceite
 
@@ -51,3 +51,12 @@ class ProviderIA(Protocol):
 - Nenhum teste automatizado chama a OpenAI real.
 
 **Commit sugerido:** `feat: adiciona configuracao e provider openai`
+
+## Registro de execução
+
+- Data: 2026-08-25
+- Vermelho observado: 2 falhas de modelo/criptografia, 8 de provider, 12 de services/API e 3 de página antes das respectivas implementações.
+- Implementação realizada: configuração única por empresa, criptografia Fernet, protocolo e provider OpenAI, services isolados, API segura, página-shell e ajuda contextual.
+- Refatorações: cliente HTTP injetável, contratos públicos sem segredo, handlers comuns de autenticação/validação e inclusão da app no import-linter.
+- Comandos e resultados: `ruff check .` aprovado; `ruff format --check .` com 196 arquivos formatados; `manage.py check` sem problemas; migrações consistentes e aplicadas; `uv run pytest -q` com 166 testes aprovados.
+- Commit: `feat: adiciona configuracao e provider openai`

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Configuracao de IA | Atendimento{% endblock %}
+
+{% block estilos %}
+  <link rel="stylesheet" href="{% static 'src/css/configuracao-empresa.css' %}">
+{% endblock %}
+
+{% block conteudo %}
+  <section class="cabecalho-pagina">
+    <div>
+      <p class="rotulo-pagina">Automacao</p>
+      <h1>Configuracao de IA</h1>
+      <p>Defina a identidade da assistente e conecte sua conta OpenAI.</p>
+    </div>
+    {% include "componentes/link_ajuda.html" with topico_ajuda="configuracao-de-ia" %}
+  </section>
+
+  <section id="carregador-ia" hx-get="/api/v1/ia/configuracao" hx-trigger="load" hx-swap="none">
+    <form
+      id="formulario-ia"
+      class="cartao formulario-configuracao"
+      hx-put="/api/v1/ia/configuracao"
+      hx-ext="json-enc"
+      hx-swap="none"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    >
+      <fieldset>
+        <legend>Modelo e identidade</legend>
+        <label>Modelo <input name="modelo" maxlength="120" required></label>
+        <label>Nome da assistente <input name="nome_assistente" maxlength="120"></label>
+        <label>Personalidade <textarea name="personalidade" maxlength="4000"></textarea></label>
+      </fieldset>
+      <fieldset>
+        <legend>Mensagens</legend>
+        <label>Saudacao <textarea name="mensagem_saudacao" maxlength="1000"></textarea></label>
+        <label>Falha <textarea name="mensagem_falha" maxlength="1000"></textarea></label>
+        <label><input name="respostas_automaticas_ativas" type="checkbox"> Ativar respostas automaticas</label>
+      </fieldset>
+      <fieldset>
+        <legend>Credencial OpenAI</legend>
+        <label>Nova chave API <input name="chave_api" type="password" maxlength="500" autocomplete="new-password"></label>
+        <p id="estado-chave">Nenhuma chave configurada.</p>
+      </fieldset>
+      <input name="atualizado_em" type="hidden">
+      <button type="submit">Salvar configuracao</button>
+    </form>
+
+    <div class="cartao formulario-configuracao">
+      <form
+        id="formulario-teste-ia"
+        hx-post="/api/v1/ia/teste"
+        hx-ext="json-enc"
+        hx-swap="none"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      >
+        <input name="modelo" type="hidden">
+        <input name="chave_api" type="hidden">
+        <button type="submit">Testar conexao</button>
+      </form>
+      <button
+        id="remover-chave-ia"
+        type="button"
+        hx-delete="/api/v1/ia/configuracao/chave"
+        hx-swap="none"
+        hx-confirm="Remover a chave OpenAI configurada?"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      >Remover chave</button>
+      <p id="feedback-ia" role="status" aria-live="polite">Carregando configuracao...</p>
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'vendor/htmx.min.js' %}"></script>
+  <script src="{% static 'vendor/htmx-ext-json-enc.js' %}"></script>
+  <script>
+    (() => {
+      const formulario = document.querySelector("#formulario-ia");
+      const teste = document.querySelector("#formulario-teste-ia");
+      const feedback = document.querySelector("#feedback-ia");
+      const estadoChave = document.querySelector("#estado-chave");
+      const campos = ["modelo", "nome_assistente", "personalidade", "mensagem_saudacao", "mensagem_falha", "atualizado_em"];
+
+      teste.addEventListener("htmx:configRequest", () => {
+        teste.elements.modelo.value = formulario.elements.modelo.value;
+        teste.elements.chave_api.value = formulario.elements.chave_api.value;
+      });
+      document.body.addEventListener("htmx:afterRequest", (evento) => {
+        if (!["carregador-ia", "formulario-ia", "formulario-teste-ia", "remover-chave-ia"].includes(evento.detail.elt.id)) return;
+        const dados = JSON.parse(evento.detail.xhr.responseText);
+        if (!evento.detail.successful) {
+          feedback.textContent = dados.mensagem || "Nao foi possivel concluir a operacao.";
+          return;
+        }
+        if (evento.detail.elt.id === "formulario-teste-ia") {
+          feedback.textContent = dados.mensagem;
+          return;
+        }
+        campos.forEach((nome) => { formulario.elements[nome].value = dados[nome] || ""; });
+        formulario.elements.respostas_automaticas_ativas.checked = dados.respostas_automaticas_ativas;
+        formulario.elements.chave_api.value = "";
+        estadoChave.textContent = dados.chave_configurada ? "Chave configurada." : "Nenhuma chave configurada.";
+        feedback.textContent = evento.detail.elt.id === "carregador-ia" ? "Configuracao carregada." : "Configuracao atualizada.";
+      });
+    })();
+  </script>
+{% endblock %}
