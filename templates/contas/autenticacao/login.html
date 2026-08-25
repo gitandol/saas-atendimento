@@ -3,17 +3,30 @@
 {% block titulo %}Entrar | Atendimento{% endblock %}
 
 {% block conteudo %}
-  <section class="cartao cartao-autenticacao">
-    <h1>Entrar</h1>
-    <form id="form-login" class="formulario-autenticacao">
-      <label for="email">E-mail</label>
-      <input id="email" name="email" type="email" autocomplete="email" required>
-      <label for="senha">Senha</label>
-      <input id="senha" name="senha" type="password" autocomplete="current-password" required>
-      <button type="submit">Entrar</button>
-      <p id="erro-login" role="alert"></p>
-    </form>
-  </section>
+  <div class="grade-login">
+    <section class="apresentacao-login" aria-labelledby="titulo-boas-vindas">
+      <p class="rotulo-pagina">Atendimento inteligente</p>
+      <h1 id="titulo-boas-vindas">Conecte. Atenda. Cresça.</h1>
+      <p>Centralize conversas e ofereça respostas mais rápidas sem perder o toque humano.</p>
+      <ul class="beneficios-login">
+        <li>Respostas organizadas</li>
+        <li>Equipe e IA no mesmo fluxo</li>
+      </ul>
+    </section>
+    <section class="cartao cartao-login" aria-labelledby="titulo-login">
+      <p class="rotulo-pagina">Acesso seguro</p>
+      <h2 id="titulo-login">Acesse sua conta</h2>
+      <p class="texto-apoio">Use os dados cadastrados para continuar.</p>
+      <form id="form-login" class="formulario-autenticacao">
+        <label for="email">E-mail</label>
+        <input id="email" name="email" type="email" autocomplete="email" required>
+        <label for="senha">Senha</label>
+        <input id="senha" name="senha" type="password" autocomplete="current-password" required>
+        <button type="submit">Entrar <span aria-hidden="true">&rarr;</span></button>
+        <p id="erro-login" role="alert"></p>
+      </form>
+    </section>
+  </div>
   <script>
     const formulario = document.querySelector("#form-login");
     const erroLogin = document.querySelector("#erro-login");

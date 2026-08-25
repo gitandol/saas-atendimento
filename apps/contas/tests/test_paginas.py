@@ -86,10 +86,15 @@ def test_views_de_paginas_apenas_delegam_ao_render() -> None:
 
 
 @pytest.mark.django_db
-def test_pagina_de_login_expoe_formulario_vertical_centralizado() -> None:
-    """Mantem o cartao e os campos ligados ao layout vertical de autenticacao."""
+def test_pagina_de_login_expoe_composicao_em_duas_colunas() -> None:
+    """Entrega hero, acesso e seletor completo no shell publico."""
     resposta = Client().get("/entrar/")
+    conteudo = resposta.content.decode()
 
     assert resposta.status_code == 200
-    assert b'class="cartao cartao-autenticacao"' in resposta.content
-    assert b'class="formulario-autenticacao"' in resposta.content
+    assert 'class="grade-login"' in conteudo
+    assert 'class="apresentacao-login"' in conteudo
+    assert 'class="cartao cartao-login"' in conteudo
+    assert 'class="formulario-autenticacao"' in conteudo
+    assert "Atendimento inteligente" in conteudo
+    assert conteudo.count("data-tema-opcao=") == 5

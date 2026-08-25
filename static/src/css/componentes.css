@@ -15,6 +15,147 @@ body {
   font-family: Inter, ui-sans-serif, system-ui, sans-serif;
   line-height: 1.5;
 }
+.pagina-publica {
+  position: relative;
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 12% 82%, var(--cor-brilho), transparent 22rem),
+    radial-gradient(circle at 92% 28%, var(--cor-brilho), transparent 18rem),
+    var(--cor-fundo);
+}
+
+.pagina-publica::before {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--cor-texto-suave) 28%, transparent) 0.7px,
+    transparent 0.7px
+  );
+  background-size: 22px 22px;
+  content: "";
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.cabecalho-publico {
+  position: relative;
+  z-index: 10;
+  padding: 1rem clamp(1rem, 4vw, 2rem);
+  border-bottom: 1px solid color-mix(in srgb, var(--cor-borda) 70%, transparent);
+  background: color-mix(in srgb, var(--cor-fundo) 86%, transparent);
+  backdrop-filter: blur(14px);
+}
+
+.navegacao-publica {
+  display: flex;
+  width: min(100%, 70rem);
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-inline: auto;
+}
+
+.marca-publica {
+  color: var(--cor-texto);
+  text-decoration: none;
+}
+
+.acoes-publicas {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.link-ajuda-publico {
+  padding: 0.55rem 0.35rem;
+  color: var(--cor-texto-suave);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.link-ajuda-publico:hover {
+  color: var(--cor-primaria);
+}
+
+.conteudo-publico {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: 100%;
+  flex: 1;
+  align-items: center;
+  padding: clamp(1.5rem, 5vw, 4rem) clamp(1rem, 4vw, 2rem);
+}
+
+.grade-login {
+  display: grid;
+  width: min(100%, 70rem);
+  align-items: center;
+  gap: clamp(2rem, 7vw, 7rem);
+  margin-inline: auto;
+}
+
+.apresentacao-login {
+  max-width: 37rem;
+}
+
+.apresentacao-login h1 {
+  max-width: 10ch;
+  margin: 0.65rem 0 1rem;
+  font-size: clamp(2.45rem, 7vw, 5rem);
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+
+.apresentacao-login > p:not(.rotulo-pagina) {
+  max-width: 34rem;
+  margin: 0;
+  color: var(--cor-texto-suave);
+  font-size: clamp(1rem, 2vw, 1.12rem);
+}
+
+.beneficios-login {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  color: var(--cor-texto-suave);
+  list-style: none;
+}
+
+.beneficios-login li::before {
+  margin-right: 0.45rem;
+  color: var(--cor-primaria);
+  content: "✓";
+}
+
+.cartao-login {
+  width: min(100%, 28rem);
+  justify-self: end;
+  padding: clamp(1.4rem, 4vw, 2rem);
+  border-color: color-mix(in srgb, var(--cor-borda) 78%, var(--cor-primaria));
+  background: color-mix(in srgb, var(--cor-superficie) 96%, transparent);
+  box-shadow:
+    0 24px 70px color-mix(in srgb, var(--cor-fundo) 62%, transparent),
+    0 0 55px var(--cor-brilho);
+  backdrop-filter: blur(16px);
+}
+
+.cartao-login h2 {
+  margin: 0.55rem 0 0.25rem;
+  font-size: clamp(1.55rem, 3vw, 2rem);
+}
+
+.texto-apoio {
+  margin: 0;
+  color: var(--cor-texto-suave);
+}
+
 
 button,
 input,
@@ -307,15 +448,6 @@ a {
   box-shadow: var(--sombra);
 }
 
-.cartao-autenticacao {
-  width: min(100%, 28rem);
-  margin: clamp(2rem, 8vh, 6rem) auto;
-}
-
-.cartao-autenticacao h1 {
-  margin: 0;
-  text-align: center;
-}
 
 .formulario-autenticacao {
   display: grid;
@@ -333,7 +465,7 @@ a {
   min-height: 3rem;
   padding: 0.7rem 0.85rem;
   border: 1px solid var(--cor-borda);
-  background: var(--cor-fundo);
+  background: var(--cor-superficie-interna);
   color: var(--cor-texto);
 }
 
@@ -343,6 +475,9 @@ a {
 }
 
 .formulario-autenticacao button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   min-height: 3rem;
   margin-top: 0.75rem;
   padding: 0.7rem 1rem;
@@ -393,7 +528,36 @@ a {
   display: none;
 }
 
+@media (min-width: 768px) {
+  .grade-login {
+    grid-template-columns: minmax(0, 1.1fr) minmax(20rem, 28rem);
+  }
+}
+
 @media (max-width: 767px) {
+  .conteudo-publico {
+    align-items: flex-start;
+    padding-block: 2rem;
+  }
+
+  .grade-login {
+    gap: 1.75rem;
+  }
+
+  .apresentacao-login h1 {
+    max-width: 12ch;
+    font-size: clamp(2.35rem, 13vw, 3.5rem);
+  }
+
+  .beneficios-login {
+    display: none;
+  }
+
+  .cartao-login {
+    justify-self: stretch;
+  }
+
+
   .sidebar {
     width: min(18rem, 86vw);
     transform: translateX(-105%);
@@ -451,5 +615,6 @@ a {
   *::after {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
   }
 }

@@ -9,14 +9,20 @@
     <link rel="stylesheet" href="{% static 'dist/css/aplicacao.css' %}">
     <script src="{% static 'src/js/tema.js' %}" defer></script>
   </head>
-  <body class="min-h-screen" data-autenticado="false">
-    <header class="border-b border-slate-200 p-4 dark:border-slate-800">
-      <nav class="mx-auto flex max-w-6xl justify-between" aria-label="Principal">
-        <a href="/">Atendimento</a>
-        <a href="#ajuda">Ajuda</a>
+  <body class="pagina-publica" data-autenticado="false">
+    <header class="cabecalho-publico">
+      <nav class="navegacao-publica" aria-label="Principal">
+        <a class="marca marca-publica" href="/">
+          <span class="marca-simbolo" aria-hidden="true">A</span>
+          <span>Atendimento</span>
+        </a>
+        <div class="acoes-publicas">
+          {% include "componentes/seletor_tema.html" %}
+          <a class="link-ajuda-publico" href="#ajuda">Ajuda</a>
+        </div>
       </nav>
     </header>
-    <main class="mx-auto max-w-6xl p-4">
+    <main id="conteudo-principal" class="conteudo-publico">
       {% block conteudo %}{% endblock %}
     </main>
   </body>
