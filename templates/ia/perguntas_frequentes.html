@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Perguntas frequentes | Atendimento{% endblock %}
+
+{% block conteudo %}
+  <section class="cabecalho-pagina">
+    <div>
+      <p class="rotulo-pagina">Automacao</p>
+      <h1>Perguntas frequentes</h1>
+      <p>Cadastre respostas diretas para as duvidas mais comuns.</p>
+    </div>
+    {% include "componentes/link_ajuda.html" with topico_ajuda="base-de-conhecimento" %}
+  </section>
+
+  <section class="pilha-configuracao">
+    <form class="cartao formulario-configuracao" hx-post="/api/v1/ia/perguntas-frequentes" hx-ext="json-enc" hx-swap="none" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+      <fieldset>
+        <legend>Nova pergunta</legend>
+        <label>Pergunta <input name="pergunta" maxlength="500" required></label>
+        <label>Resposta <textarea name="resposta" maxlength="10000" required></textarea></label>
+        <label>Ordem <input name="ordem" type="number" min="0" value="0" required></label>
+        <label class="campo-checkbox"><input name="ativo" type="checkbox" checked> Ativa</label>
+      </fieldset>
+      <button type="submit">Adicionar pergunta</button>
+    </form>
+    <template id="modelo-faq">
+      <article class="cartao">
+        <form hx-put="/api/v1/ia/perguntas-frequentes/__id__" hx-ext="json-enc" hx-swap="none" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+          <label>Pergunta <input name="pergunta" maxlength="500" required></label>
+          <label>Resposta <textarea name="resposta" maxlength="10000" required></textarea></label>
+          <label>Ordem <input name="ordem" type="number" min="0" required></label>
+          <label class="campo-checkbox"><input name="ativo" type="checkbox"> Ativa</label>
+          <button type="submit">Salvar</button>
+        </form>
+        <button type="button" hx-delete="/api/v1/ia/perguntas-frequentes/__id__" hx-swap="none" hx-confirm="Excluir esta pergunta?" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>Excluir</button>
+      </article>
+    </template>
+    <div id="lista-faq" class="pilha-configuracao" hx-get="/api/v1/ia/perguntas-frequentes" hx-trigger="load, faqAlterada from:body" hx-swap="none">
+      <p data-estado="carregando" role="status">Carregando perguntas frequentes...</p>
+      <p data-estado="vazio" hidden>Nenhuma pergunta frequente cadastrada.</p>
+      <p data-estado="erro" hidden>Nao foi possivel carregar as perguntas frequentes.</p>
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'vendor/htmx.min.js' %}"></script>
+  <script src="{% static 'vendor/htmx-ext-json-enc.js' %}"></script>
+  <script>
+    document.body.addEventListener("htmx:afterRequest", (evento) => {
+      const lista = document.querySelector("#lista-faq");
+      if (evento.detail.elt.closest("form") && evento.detail.successful) {
+        htmx.trigger(document.body, "faqAlterada");
+      }
+      if (evento.detail.elt !== lista) return;
+      lista.querySelector('[data-estado="carregando"]').hidden = true;
+      lista.querySelector('[data-estado="erro"]').hidden = evento.detail.successful;
+      if (!evento.detail.successful) return;
+      const dados = JSON.parse(evento.detail.xhr.responseText);
+      lista.querySelector('[data-estado="vazio"]').hidden = dados.total !== 0;
+      lista.querySelectorAll("article").forEach((item) => item.remove());
+      dados.itens.forEach((item) => {
+        const artigo = document.querySelector("#modelo-faq").content.firstElementChild.cloneNode(true);
+        const formulario = artigo.querySelector("form");
+        const excluir = artigo.querySelector("button[hx-delete]");
+        formulario.setAttribute("hx-put", `/api/v1/ia/perguntas-frequentes/${item.id}`);
+        excluir.setAttribute("hx-delete", `/api/v1/ia/perguntas-frequentes/${item.id}`);
+        formulario.elements.pergunta.value = item.pergunta;
+        formulario.elements.resposta.value = item.resposta;
+        formulario.elements.ordem.value = item.ordem;
+        formulario.elements.ativo.checked = item.ativo;
+        lista.appendChild(artigo);
+        htmx.process(artigo);
+      });
+    });
+  </script>
+{% endblock %}

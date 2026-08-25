@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Base de conhecimento | Atendimento{% endblock %}
+
+{% block conteudo %}
+  <section class="cabecalho-pagina">
+    <div>
+      <p class="rotulo-pagina">Automacao</p>
+      <h1>Base de conhecimento</h1>
+      <p>Cadastre textos informativos usados nas respostas da IA.</p>
+    </div>
+    {% include "componentes/link_ajuda.html" with topico_ajuda="base-de-conhecimento" %}
+  </section>
+
+  <section class="pilha-configuracao">
+    <form class="cartao formulario-configuracao" hx-post="/api/v1/ia/conhecimentos" hx-ext="json-enc" hx-swap="none" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+      <fieldset>
+        <legend>Novo texto</legend>
+        <label>Titulo <input name="titulo" maxlength="200" required></label>
+        <label>Conteudo <textarea name="conteudo" maxlength="50000" required></textarea></label>
+        <label>Ordem <input name="ordem" type="number" min="0" value="0" required></label>
+        <label class="campo-checkbox"><input name="ativo" type="checkbox" checked> Ativo</label>
+      </fieldset>
+      <button type="submit">Adicionar conhecimento</button>
+    </form>
+    <template id="modelo-conhecimento">
+      <article class="cartao">
+        <form hx-put="/api/v1/ia/conhecimentos/__id__" hx-ext="json-enc" hx-swap="none" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+          <label>Titulo <input name="titulo" maxlength="200" required></label>
+          <label>Conteudo <textarea name="conteudo" maxlength="50000" required></textarea></label>
+          <label>Ordem <input name="ordem" type="number" min="0" required></label>
+          <label class="campo-checkbox"><input name="ativo" type="checkbox"> Ativo</label>
+          <button type="submit">Salvar</button>
+        </form>
+        <button type="button" hx-delete="/api/v1/ia/conhecimentos/__id__" hx-swap="none" hx-confirm="Excluir este conhecimento?" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>Excluir</button>
+      </article>
+    </template>
+    <div id="lista-conhecimentos" class="pilha-configuracao" hx-get="/api/v1/ia/conhecimentos" hx-trigger="load, conhecimentoAlterado from:body" hx-swap="none">
+      <p data-estado="carregando" role="status">Carregando conhecimentos...</p>
+      <p data-estado="vazio" hidden>Nenhum conhecimento cadastrado.</p>
+      <p data-estado="erro" hidden>Nao foi possivel carregar os conhecimentos.</p>
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'vendor/htmx.min.js' %}"></script>
+  <script src="{% static 'vendor/htmx-ext-json-enc.js' %}"></script>
+  <script>
+    document.body.addEventListener("htmx:afterRequest", (evento) => {
+      const lista = document.querySelector("#lista-conhecimentos");
+      if (evento.detail.elt.closest("form") && evento.detail.successful) {
+        htmx.trigger(document.body, "conhecimentoAlterado");
+      }
+      if (evento.detail.elt !== lista) return;
+      lista.querySelector('[data-estado="carregando"]').hidden = true;
+      lista.querySelector('[data-estado="erro"]').hidden = evento.detail.successful;
+      if (!evento.detail.successful) return;
+      const dados = JSON.parse(evento.detail.xhr.responseText);
+      lista.querySelector('[data-estado="vazio"]').hidden = dados.total !== 0;
+      lista.querySelectorAll("article").forEach((item) => item.remove());
+      dados.itens.forEach((item) => {
+        const artigo = document.querySelector("#modelo-conhecimento").content.firstElementChild.cloneNode(true);
+        const formulario = artigo.querySelector("form");
+        const excluir = artigo.querySelector("button[hx-delete]");
+        formulario.setAttribute("hx-put", `/api/v1/ia/conhecimentos/${item.id}`);
+        excluir.setAttribute("hx-delete", `/api/v1/ia/conhecimentos/${item.id}`);
+        formulario.elements.titulo.value = item.titulo;
+        formulario.elements.conteudo.value = item.conteudo;
+        formulario.elements.ordem.value = item.ordem;
+        formulario.elements.ativo.checked = item.ativo;
+        lista.appendChild(artigo);
+        htmx.process(artigo);
+      });
+    });
+  </script>
+{% endblock %}
