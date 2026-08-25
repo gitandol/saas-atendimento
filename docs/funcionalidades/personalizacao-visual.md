@@ -2,6 +2,8 @@
 
 O layout administrativo oferece cinco paletas e três opções de luminosidade. A escolha altera a interface sem recarregar a página.
 
++As cinco paletas compartilham a mesma linguagem visual vibrante: fundo neutro escuro ou claro, cartões elevados, tipografia de alto contraste e destaques derivados da cor escolhida. A identidade muda entre azul, esmeralda, violeta, rubi e âmbar sem alterar a estrutura das páginas.
+
 ## Alterar a aparência
 
 1. Na barra superior, abra o botão de personalização.

@@ -49,3 +49,12 @@
 - Verificações: `npm run css:build`; `npm run test:js` (4 testes); `ruff check .`; `ruff format --check .`; `manage.py check`; `manage.py makemigrations --check --dry-run`; `pytest` (91 testes); `git diff --check`.
 - Observação: a inspeção visual interativa no navegador interno não pôde ser executada porque o processo do navegador foi bloqueado pelo sandbox; as verificações estruturais, responsivas e de acessibilidade foram executadas por testes.
 - Commit: `feat: adiciona layout responsivo e temas`.
+
+## Reformulação visual vibrante — 2026-08-24
+
+- TDD: os novos testes falharam primeiro pela ausência dos tokens de superfície/brilho, da grade de login e dos contratos de largura limitada/estado ativo da sidebar.
+- Implementação: paletas azul, esmeralda, violeta, rubi e âmbar renovadas com contraste AA; login responsivo em duas colunas a partir de 768 px; shell autenticado com sidebar preservada, item ativo acessível, cartões internos e destaques derivados dos tokens.
+- Compatibilidade: modos **Claro**, **Escuro** e **Sistema**, persistência local/autenticada, endpoints, IDs e atributos JavaScript foram preservados.
+- Verificações: `.venv/bin/pytest -q` com a venv no `PATH` (105 testes); `ruff check .`; `ruff format --check .`; `manage.py check`; `manage.py makemigrations --check --dry-run`; `npm run test:js` (4 testes); `npm run css:build`; `git diff --check`.
+- Docker: `docker compose build web` compilou o Tailwind e coletou 133 arquivos estáticos; o serviço ficou saudável e `/static/dist/css/aplicacao.css` respondeu HTTP 200 com `Content-Type: text/css`.
+- Inspeção visual: o navegador interno não pôde ser inicializado por falha do executor local (`setup refresh had errors`). A estrutura responsiva de 360, 768, 1280 e 1920 px, foco visível e movimento reduzido foram mantidos no CSS e nos testes automatizados, mas a conferência visual interativa permanece pendente.
