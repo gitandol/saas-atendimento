@@ -1,3 +1,8 @@
+.pilha-configuracao {
+  display: grid;
+  gap: 1rem;
+}
+
 .formulario-configuracao {
   display: grid;
   gap: 1.25rem;
@@ -36,6 +41,23 @@
   border-radius: 0.55rem;
   background: var(--cor-superficie);
   color: var(--cor-texto);
+}
+
+.formulario-configuracao .campo-checkbox {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.formulario-configuracao .campo-checkbox input[type="checkbox"] {
+  width: 1.125rem;
+  height: 1.125rem;
+  min-height: 0;
+  flex: 0 0 auto;
+  padding: 0;
+  margin: 0;
+  accent-color: var(--cor-primaria);
 }
 
 .formulario-configuracao textarea {

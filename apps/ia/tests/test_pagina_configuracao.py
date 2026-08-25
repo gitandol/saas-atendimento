@@ -37,6 +37,33 @@ def test_pagina_shell_consume_api_e_exibe_ajuda() -> None:
 
 
 @pytest.mark.django_db
+def test_pagina_alinha_checkbox_de_respostas_automaticas() -> None:
+    """Agrupa o checkbox e seu texto na mesma linha visual."""
+    usuario = Usuario.objects.create_user(email="checkbox-ia@example.com")
+    cliente = Client()
+    cliente.force_login(usuario)
+
+    resposta = cliente.get("/ia/configuracao/")
+
+    assert resposta.status_code == 200
+    assert b'<label class="campo-checkbox">' in resposta.content
+    assert b'name="respostas_automaticas_ativas" type="checkbox"' in resposta.content
+
+
+@pytest.mark.django_db
+def test_pagina_separa_cartoes_de_configuracao_e_acoes() -> None:
+    """Organiza os cartoes da pagina em uma pilha com espacamento."""
+    usuario = Usuario.objects.create_user(email="cartoes-ia@example.com")
+    cliente = Client()
+    cliente.force_login(usuario)
+
+    resposta = cliente.get("/ia/configuracao/")
+
+    assert resposta.status_code == 200
+    assert b'id="carregador-ia" class="pilha-configuracao"' in resposta.content
+
+
+@pytest.mark.django_db
 def test_sidebar_exibe_acesso_a_configuracao_de_ia() -> None:
     """Mantem a nova pagina acessivel na navegacao autenticada."""
     usuario = Usuario.objects.create_user(email="sidebar-ia@example.com")

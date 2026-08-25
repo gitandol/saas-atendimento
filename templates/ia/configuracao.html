@@ -17,7 +17,7 @@
     {% include "componentes/link_ajuda.html" with topico_ajuda="configuracao-de-ia" %}
   </section>
 
-  <section id="carregador-ia" hx-get="/api/v1/ia/configuracao" hx-trigger="load" hx-swap="none">
+  <section id="carregador-ia" class="pilha-configuracao" hx-get="/api/v1/ia/configuracao" hx-trigger="load" hx-swap="none">
     <form
       id="formulario-ia"
       class="cartao formulario-configuracao"
@@ -36,7 +36,7 @@
         <legend>Mensagens</legend>
         <label>Saudacao <textarea name="mensagem_saudacao" maxlength="1000"></textarea></label>
         <label>Falha <textarea name="mensagem_falha" maxlength="1000"></textarea></label>
-        <label><input name="respostas_automaticas_ativas" type="checkbox"> Ativar respostas automaticas</label>
+        <label class="campo-checkbox"><input name="respostas_automaticas_ativas" type="checkbox"> Ativar respostas automaticas</label>
       </fieldset>
       <fieldset>
         <legend>Credencial OpenAI</legend>
