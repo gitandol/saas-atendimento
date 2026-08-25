@@ -83,3 +83,13 @@ def test_views_de_paginas_apenas_delegam_ao_render() -> None:
 
     render_login.assert_called_once_with(requisicao, "contas/autenticacao/login.html")
     render_perfil.assert_called_once_with(requisicao, "contas/perfil.html")
+
+
+@pytest.mark.django_db
+def test_pagina_de_login_expoe_formulario_vertical_centralizado() -> None:
+    """Mantem o cartao e os campos ligados ao layout vertical de autenticacao."""
+    resposta = Client().get("/entrar/")
+
+    assert resposta.status_code == 200
+    assert b'class="cartao cartao-autenticacao"' in resposta.content
+    assert b'class="formulario-autenticacao"' in resposta.content

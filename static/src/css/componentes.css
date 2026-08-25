@@ -307,6 +307,62 @@ a {
   box-shadow: var(--sombra);
 }
 
+.cartao-autenticacao {
+  width: min(100%, 28rem);
+  margin: clamp(2rem, 8vh, 6rem) auto;
+}
+
+.cartao-autenticacao h1 {
+  margin: 0;
+  text-align: center;
+}
+
+.formulario-autenticacao {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.formulario-autenticacao label {
+  margin-top: 0.5rem;
+  font-weight: 650;
+}
+
+.formulario-autenticacao input {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--cor-borda);
+  background: var(--cor-fundo);
+  color: var(--cor-texto);
+}
+
+.formulario-autenticacao input:hover,
+.formulario-autenticacao input:focus {
+  border-color: var(--cor-primaria);
+}
+
+.formulario-autenticacao button {
+  min-height: 3rem;
+  margin-top: 0.75rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--cor-primaria);
+  background: var(--cor-primaria);
+  color: var(--cor-em-primaria);
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.formulario-autenticacao button:hover {
+  filter: brightness(1.08);
+}
+
+.formulario-autenticacao [role="alert"] {
+  min-height: 1.5rem;
+  margin: 0.5rem 0 0;
+  color: var(--cor-alerta);
+}
+
 .cartao h2 {
   margin-top: 0;
 }
