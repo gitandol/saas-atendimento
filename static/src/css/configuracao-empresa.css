@@ -1,0 +1,72 @@
+.formulario-configuracao {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.formulario-configuracao fieldset {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 0.8rem;
+  background: var(--cor-superficie-interna);
+}
+
+.formulario-configuracao legend {
+  padding-inline: 0.4rem;
+  color: var(--cor-primaria);
+  font-weight: 750;
+}
+
+.formulario-configuracao label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--cor-texto-suave);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.formulario-configuracao input,
+.formulario-configuracao textarea {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 0.55rem;
+  background: var(--cor-superficie);
+  color: var(--cor-texto);
+}
+
+.formulario-configuracao textarea {
+  min-height: 7rem;
+}
+
+.formulario-configuracao input:hover,
+.formulario-configuracao input:focus,
+.formulario-configuracao textarea:hover,
+.formulario-configuracao textarea:focus {
+  border-color: var(--cor-primaria);
+}
+
+.formulario-configuracao button {
+  min-height: 2.75rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--cor-primaria);
+  border-radius: 0.55rem;
+  background: var(--cor-primaria);
+  color: var(--cor-em-primaria);
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.formulario-configuracao [role="status"] {
+  min-height: 1.5rem;
+  color: var(--cor-texto-suave);
+}
+
+@media (max-width: 767px) {
+  .formulario-configuracao fieldset {
+    grid-template-columns: 1fr;
+  }
+}

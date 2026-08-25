@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Configuracao da empresa | Atendimento{% endblock %}
+
+{% block estilos %}
+  <link rel="stylesheet" href="{% static 'src/css/configuracao-empresa.css' %}">
+{% endblock %}
+
+{% block conteudo %}
+  <section class="cabecalho-pagina">
+    <div>
+      <p class="rotulo-pagina">Administracao</p>
+      <h1>Configuracao da empresa</h1>
+      <p>Mantenha as informacoes usadas no atendimento e nas respostas da IA.</p>
+    </div>
+    {% include "componentes/link_ajuda.html" with topico_ajuda="configuracao-da-empresa" %}
+  </section>
+
+  <section
+    id="carregador-configuracao"
+    hx-get="/api/v1/empresa"
+    hx-trigger="load"
+    hx-swap="none"
+  >
+    <form
+      id="formulario-configuracao"
+      class="cartao formulario-configuracao"
+      hx-put="/api/v1/empresa"
+      hx-ext="json-enc"
+      hx-swap="none"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    >
+      <fieldset>
+        <legend>Perfil</legend>
+        <label>Nome <input name="nome" maxlength="160" required></label>
+        <label>Segmento <input name="segmento" maxlength="120"></label>
+        <label>Descricao <textarea name="descricao" maxlength="2000"></textarea></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Atendimento</legend>
+        <label>Horario de atendimento <input name="horario_atendimento" maxlength="500"></label>
+        <label>Instrucoes de atendimento <textarea name="instrucoes_atendimento" maxlength="4000"></textarea></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Contato</legend>
+        <label>Endereco <input name="endereco" maxlength="500"></label>
+        <label>Telefone <input name="telefone" maxlength="30" inputmode="tel"></label>
+        <label>Site <input name="site" maxlength="500" type="url"></label>
+      </fieldset>
+
+      <input name="atualizado_em" type="hidden">
+      <button type="submit">Salvar configuracao</button>
+      <p id="feedback-configuracao" role="status" aria-live="polite">
+        Carregando configuracao...
+      </p>
+    </form>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'vendor/htmx.min.js' %}"></script>
+  <script src="{% static 'vendor/htmx-ext-json-enc.js' %}"></script>
+  <script>
+    (() => {
+      const formulario = document.querySelector("#formulario-configuracao");
+      const feedback = document.querySelector("#feedback-configuracao");
+      const campos = [
+        "nome", "segmento", "descricao", "horario_atendimento", "endereco",
+        "telefone", "site", "instrucoes_atendimento", "atualizado_em"
+      ];
+
+      document.body.addEventListener("htmx:afterRequest", (evento) => {
+        if (!["carregador-configuracao", "formulario-configuracao"].includes(evento.detail.elt.id)) return;
+        const dados = JSON.parse(evento.detail.xhr.responseText);
+        if (!evento.detail.successful) {
+          feedback.textContent = dados.mensagem || "Nao foi possivel salvar.";
+          return;
+        }
+        campos.forEach((nome) => { formulario.elements[nome].value = dados[nome] || ""; });
+        feedback.textContent = evento.detail.elt.id === "formulario-configuracao"
+          ? "Configuracao salva."
+          : "Configuracao carregada.";
+      });
+    })();
+  </script>
+{% endblock %}

@@ -13,5 +13,6 @@ urlpatterns = [
     path("entrar/", pagina_login, name="entrar"),
     path("perfil/", pagina_perfil, name="perfil"),
     path("auditoria/", include("apps.auditoria.urls")),
+    path("empresa/", include("apps.empresas.urls.paginas")),
     path("ajuda/", include("apps.ajuda.urls")),
 ]

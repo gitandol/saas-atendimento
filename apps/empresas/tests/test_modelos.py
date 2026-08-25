@@ -26,6 +26,30 @@ def test_empresa_tem_uuid_e_registra_data_de_criacao(empresa):
 
 
 @pytest.mark.django_db
+def test_empresa_armazena_configuracao_e_versao_de_atualizacao() -> None:
+    """Persiste o perfil operacional com uma versao para concorrencia."""
+    empresa = Empresa.objects.create(
+        nome="Clinica Exemplo",
+        segmento="Saude",
+        descricao="Atendimento humanizado.",
+        horario_atendimento="Segunda a sexta, das 8h as 18h.",
+        endereco="Rua Principal, 100",
+        telefone="+5568999990000",
+        site="https://clinica.example.com",
+        instrucoes_atendimento="Priorize urgencias.",
+    )
+
+    assert empresa.segmento == "Saude"
+    assert empresa.descricao == "Atendimento humanizado."
+    assert empresa.horario_atendimento == "Segunda a sexta, das 8h as 18h."
+    assert empresa.endereco == "Rua Principal, 100"
+    assert empresa.telefone == "+5568999990000"
+    assert empresa.site == "https://clinica.example.com"
+    assert empresa.instrucoes_atendimento == "Priorize urgencias."
+    assert empresa.atualizado_em is not None
+
+
+@pytest.mark.django_db
 @pytest.mark.parametrize(
     "papel",
     [MembroEmpresa.Papel.ADMINISTRADOR, MembroEmpresa.Papel.ATENDENTE],

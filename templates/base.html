@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'dist/css/aplicacao.css' %}">
     <script src="{% static 'src/js/tema.js' %}" defer></script>
     <script src="{% static 'src/js/sidebar.js' %}" defer></script>
+    {% block estilos %}{% endblock %}
   </head>
   <body data-autenticado="{{ request.user.is_authenticated|yesno:'true,false' }}">
     <a class="pular-conteudo" href="#conteudo-principal">Pular para o conte&uacute;do</a>

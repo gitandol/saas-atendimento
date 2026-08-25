@@ -50,6 +50,8 @@ source_modules = [
     "apps.auditoria.views",
     "apps.contas.api",
     "apps.contas.views",
+    "apps.empresas.api",
+    "apps.empresas.views",
     "apps.nucleo.api",
     "apps.nucleo.views",
 ]
