@@ -19,3 +19,18 @@ def test_css_do_admin_e_servido_com_debug_desabilitado(
 
     assert resposta.status_code == 200
     assert resposta.headers["Content-Type"].startswith("text/css")
+
+
+def test_css_da_aplicacao_e_servido_com_debug_desabilitado(
+    settings: object,
+    tmp_path: Path,
+) -> None:
+    """Evita que as paginas da aplicacao sejam entregues sem o design system."""
+    settings.DEBUG = False
+    settings.STATIC_ROOT = tmp_path / "staticfiles"
+    call_command("collectstatic", interactive=False, verbosity=0)
+
+    resposta = Client().get("/static/dist/css/aplicacao.css")
+
+    assert resposta.status_code == 200
+    assert resposta.headers["Content-Type"].startswith("text/css")
