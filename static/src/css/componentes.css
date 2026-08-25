@@ -557,6 +557,45 @@ a {
   color: var(--cor-primaria);
 }
 
+.grupo-navegacao-ia {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.resumo-grupo-navegacao {
+  list-style: none;
+  cursor: pointer;
+}
+
+.resumo-grupo-navegacao::-webkit-details-marker {
+  display: none;
+}
+
+.seta-submenu {
+  margin-left: auto;
+  transition: transform 180ms ease;
+}
+
+.grupo-navegacao-ia[open] .seta-submenu {
+  transform: rotate(180deg);
+}
+
+.submenu-navegacao {
+  display: grid;
+  gap: 0.25rem;
+  padding-left: 1.25rem;
+}
+
+.submenu-navegacao .item-navegacao {
+  min-height: 2.35rem;
+  padding-left: 1.8rem;
+  font-size: 0.9rem;
+}
+
+.sidebar-recolhida .submenu-navegacao {
+  display: none;
+}
+
 .barra-superior {
   min-height: 4rem;
   border-color: color-mix(in srgb, var(--cor-borda) 72%, transparent);

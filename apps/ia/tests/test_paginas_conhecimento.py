@@ -21,6 +21,31 @@ def test_paginas_de_conhecimento_exigem_autenticacao(rota: str) -> None:
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("rota", "href_ativo"),
+    [
+        ("/ia/configuracao/", "/ia/configuracao/"),
+        ("/ia/conhecimentos/", "/ia/conhecimentos/"),
+        ("/ia/perguntas-frequentes/", "/ia/perguntas-frequentes/"),
+    ],
+)
+def test_submenu_ia_abre_e_seleciona_apenas_a_rota_atual(
+    rota: str, href_ativo: str
+) -> None:
+    """Destaca somente a opcao filha correspondente dentro do menu IA."""
+    identificador = href_ativo.strip("/").replace("/", "-")
+    resposta = _cliente_autenticado(f"menu-{identificador}@example.com").get(rota)
+    html = resposta.content.decode()
+
+    assert '<details class="grupo-navegacao-ia" open>' in html
+    assert (
+        f'class="item-navegacao item-navegacao-ativo" href="{href_ativo}" '
+        'aria-current="page"' in html
+    )
+    assert html.count('aria-current="page"') == 1
+
+
+@pytest.mark.django_db
 def test_pagina_documentos_consume_api_e_exibe_estados_e_ajuda() -> None:
     """Entrega shell HTMX com feedback acessivel e ajuda contextual."""
     resposta = _cliente_autenticado("pagina-doc@example.com").get("/ia/conhecimentos/")
