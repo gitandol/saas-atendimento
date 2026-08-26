@@ -15,6 +15,7 @@ from apps.contas.api.router import router as contas_router
 from apps.empresas.api.router import router as empresas_router
 from apps.ia.api.router import router as ia_router
 from apps.nucleo.api.router import router as nucleo_router
+from apps.whatsapp.api.router import router as whatsapp_router
 
 
 class ErroSchema(Schema):
@@ -36,6 +37,7 @@ api.add_router("", contas_router)
 api.add_router("", nucleo_router)
 api.add_router("", empresas_router)
 api.add_router("", ia_router)
+api.add_router("", whatsapp_router)
 api.add_router("/auditoria", auditoria_router)
 api.add_router("/ajuda", ajuda_router)
 

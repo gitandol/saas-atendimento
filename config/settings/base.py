@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "apps.auditoria",
     "apps.ajuda",
     "apps.ia",
+    "apps.whatsapp",
 ]
 
 AUTH_USER_MODEL = "contas.Usuario"

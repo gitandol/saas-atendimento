@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Conexao do WhatsApp | Atendimento{% endblock %}
+
+{% block estilos %}
+  <link rel="stylesheet" href="{% static 'src/css/configuracao-empresa.css' %}">
+{% endblock %}
+
+{% block conteudo %}
+  <section class="cabecalho-pagina">
+    <div>
+      <p class="rotulo-pagina">Mensageria</p>
+      <h1>Conexao do WhatsApp</h1>
+      <p>Conecte uma instancia da Evolution API e acompanhe seu estado.</p>
+    </div>
+    {% include "componentes/link_ajuda.html" with topico_ajuda="conexao-do-whatsapp" %}
+  </section>
+
+  <section id="carregador-whatsapp" class="pilha-configuracao" hx-get="/api/v1/whatsapp/configuracao" hx-trigger="load" hx-swap="none">
+    <form
+      id="formulario-whatsapp"
+      class="cartao formulario-configuracao"
+      hx-put="/api/v1/whatsapp/configuracao"
+      hx-ext="json-enc"
+      hx-swap="none"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+    >
+      <fieldset>
+        <legend>Evolution API</legend>
+        <label>URL base <input name="url_base" type="url" maxlength="500" placeholder="https://evolution.exemplo.com" required></label>
+        <label>Nome da instancia <input name="nome_instancia" maxlength="120" required></label>
+        <label>Nova chave API <input name="chave_api" type="password" maxlength="1000" autocomplete="new-password"></label>
+        <p id="estado-chave-whatsapp">Nenhuma chave configurada.</p>
+      </fieldset>
+      <button type="submit">Salvar configuracao</button>
+    </form>
+
+    <div class="cartao formulario-configuracao">
+      <div
+        id="estado-whatsapp"
+        role="status"
+        aria-live="polite"
+        hx-get="/api/v1/whatsapp/estado"
+        hx-trigger="load, every 15s"
+        hx-swap="none"
+      >Estado: desconectado</div>
+      <div class="acoes-formulario">
+        <button
+          id="conectar-whatsapp"
+          type="button"
+          hx-post="/api/v1/whatsapp/conectar"
+          hx-swap="none"
+          hx-confirm="Conectar esta instancia do WhatsApp?"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        >Conectar</button>
+        <button
+          id="desconectar-whatsapp"
+          type="button"
+          hx-post="/api/v1/whatsapp/desconectar"
+          hx-swap="none"
+          hx-confirm="Desconectar esta instancia do WhatsApp?"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        >Desconectar</button>
+        <button
+          id="obter-qrcode-whatsapp"
+          type="button"
+          hx-get="/api/v1/whatsapp/qrcode"
+          hx-swap="none"
+        >Exibir QR Code</button>
+      </div>
+      <figure id="qrcode-whatsapp" hidden>
+        <img alt="QR Code temporario para conectar o WhatsApp">
+        <figcaption>O QR Code expira visualmente em 60 segundos.</figcaption>
+      </figure>
+      <p id="feedback-whatsapp" role="status" aria-live="polite">Carregando configuracao...</p>
+    </div>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'vendor/htmx.min.js' %}"></script>
+  <script src="{% static 'vendor/htmx-ext-json-enc.js' %}"></script>
+  <script>
+    (() => {
+      const formulario = document.querySelector("#formulario-whatsapp");
+      const feedback = document.querySelector("#feedback-whatsapp");
+      const estado = document.querySelector("#estado-whatsapp");
+      const estadoChave = document.querySelector("#estado-chave-whatsapp");
+      const figuraQr = document.querySelector("#qrcode-whatsapp");
+      const imagemQr = figuraQr.querySelector("img");
+      let temporizadorQr;
+
+      const publicarConfiguracao = (dados) => {
+        formulario.elements.url_base.value = dados.url_base || "";
+        formulario.elements.nome_instancia.value = dados.nome_instancia || "";
+        formulario.elements.chave_api.value = "";
+        estadoChave.textContent = dados.chave_configurada ? "Chave configurada." : "Nenhuma chave configurada.";
+        estado.textContent = `Estado: ${(dados.estado || "DESCONECTADO").toLowerCase().replaceAll("_", " ")}`;
+      };
+
+      document.body.addEventListener("htmx:afterRequest", (evento) => {
+        const ids = ["carregador-whatsapp", "formulario-whatsapp", "estado-whatsapp", "conectar-whatsapp", "desconectar-whatsapp", "obter-qrcode-whatsapp"];
+        if (!ids.includes(evento.detail.elt.id)) return;
+        const dados = JSON.parse(evento.detail.xhr.responseText);
+        if (!evento.detail.successful) {
+          feedback.textContent = dados.mensagem || "Nao foi possivel concluir a operacao.";
+          return;
+        }
+        if (evento.detail.elt.id === "obter-qrcode-whatsapp") {
+          clearTimeout(temporizadorQr);
+          imagemQr.src = dados.qrcode;
+          figuraQr.hidden = false;
+          temporizadorQr = setTimeout(() => {
+            imagemQr.removeAttribute("src");
+            figuraQr.hidden = true;
+            feedback.textContent = "QR Code expirado. Solicite um novo.";
+          }, dados.expira_em_segundos * 1000);
+          feedback.textContent = "QR Code carregado temporariamente.";
+          return;
+        }
+        publicarConfiguracao(dados);
+        feedback.textContent = evento.detail.elt.id === "carregador-whatsapp" ? "Configuracao carregada." : "Operacao concluida.";
+      });
+    })();
+  </script>
+{% endblock %}

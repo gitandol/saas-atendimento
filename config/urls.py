@@ -15,5 +15,6 @@ urlpatterns = [
     path("auditoria/", include("apps.auditoria.urls")),
     path("empresa/", include("apps.empresas.urls.paginas")),
     path("ia/", include("apps.ia.urls")),
+    path("whatsapp/", include("apps.whatsapp.urls.paginas")),
     path("ajuda/", include("apps.ajuda.urls")),
 ]

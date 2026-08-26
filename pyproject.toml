@@ -58,6 +58,8 @@ source_modules = [
     "apps.ia.views",
     "apps.nucleo.api",
     "apps.nucleo.views",
+    "apps.whatsapp.api",
+    "apps.whatsapp.views",
 ]
 forbidden_modules = [
     "apps.auditoria.models",
@@ -65,6 +67,7 @@ forbidden_modules = [
     "apps.empresas.models",
     "apps.ia.models",
     "apps.nucleo.models",
+    "apps.whatsapp.models",
 ]
 
 [[tool.importlinter.contracts]]
@@ -77,6 +80,7 @@ source_modules = [
     "apps.empresas.services",
     "apps.ia.services",
     "apps.nucleo.services",
+    "apps.whatsapp.services",
 ]
 forbidden_modules = [
     "apps.ajuda.api",
@@ -89,4 +93,6 @@ forbidden_modules = [
     "apps.nucleo.views",
     "apps.ia.api",
     "apps.ia.views",
+    "apps.whatsapp.api",
+    "apps.whatsapp.views",
 ]

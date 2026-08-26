@@ -33,6 +33,10 @@
         </a>
       </div>
     </details>
+    <a class="item-navegacao{% if "/whatsapp/" in request.path %} item-navegacao-ativo{% endif %}" href="/whatsapp/configuracao/"{% if "/whatsapp/" in request.path %} aria-current="page"{% endif %}>
+      <span aria-hidden="true">&#9742;</span>
+      <span class="sidebar-rotulo">WhatsApp</span>
+    </a>
     <a class="item-navegacao{% if "/auditoria/" in request.path %} item-navegacao-ativo{% endif %}" href="/auditoria/historico/"{% if "/auditoria/" in request.path %} aria-current="page"{% endif %}>
       <span aria-hidden="true">&#9716;</span>
       <span class="sidebar-rotulo">Auditoria</span>
