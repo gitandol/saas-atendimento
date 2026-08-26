@@ -44,27 +44,32 @@
   overflow-x: auto;
 }
 
-#tabela-conhecimentos {
+#tabela-conhecimentos,
+#tabela-faq {
   width: 100%;
   border-collapse: collapse;
 }
 
 #tabela-conhecimentos th,
-#tabela-conhecimentos td {
+#tabela-conhecimentos td,
+#tabela-faq th,
+#tabela-faq td {
   padding: 0.85rem 1rem;
   border-bottom: 1px solid var(--cor-borda);
   text-align: left;
   vertical-align: middle;
 }
 
-#tabela-conhecimentos th {
+#tabela-conhecimentos th,
+#tabela-faq th {
   color: var(--cor-texto-suave);
   font-size: 0.78rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
-#tabela-conhecimentos tbody tr:last-child td {
+#tabela-conhecimentos tbody tr:last-child td,
+#tabela-faq tbody tr:last-child td {
   border-bottom: 0;
 }
 
@@ -97,7 +102,12 @@
   white-space: nowrap;
 }
 
-#modal-conhecimento {
+.modal-centralizado {
+  margin: auto;
+}
+
+#modal-conhecimento,
+#modal-faq {
   width: min(calc(100% - 2rem), 44rem);
   max-height: calc(100vh - 2rem);
   padding: 0;
@@ -109,12 +119,14 @@
   box-shadow: var(--sombra);
 }
 
-#modal-conhecimento::backdrop {
+#modal-conhecimento::backdrop,
+#modal-faq::backdrop {
   background: var(--cor-sobreposicao);
   backdrop-filter: blur(4px);
 }
 
-#formulario-conhecimento {
+#formulario-conhecimento,
+#formulario-faq {
   padding: clamp(1rem, 3vw, 1.5rem);
 }
 

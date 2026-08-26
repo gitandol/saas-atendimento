@@ -3,76 +3,188 @@
 
 {% block titulo %}Perguntas frequentes | Atendimento{% endblock %}
 
+{% block estilos %}
+  <link rel="stylesheet" href="{% static 'src/css/configuracao-empresa.css' %}">
+  <link rel="stylesheet" href="{% static 'src/css/conhecimento.css' %}">
+{% endblock %}
+
 {% block conteudo %}
-  <section class="cabecalho-pagina">
+  <section class="cabecalho-pagina cabecalho-conhecimento">
     <div>
       <p class="rotulo-pagina">Automacao</p>
       <h1>Perguntas frequentes</h1>
       <p>Cadastre respostas diretas para as duvidas mais comuns.</p>
     </div>
-    {% include "componentes/link_ajuda.html" with topico_ajuda="base-de-conhecimento" %}
-  </section>
-
-  <section class="pilha-configuracao">
-    <form class="cartao formulario-configuracao" hx-post="/api/v1/ia/perguntas-frequentes" hx-ext="json-enc" hx-swap="none" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-      <fieldset>
-        <legend>Nova pergunta</legend>
-        <label>Pergunta <input name="pergunta" maxlength="500" required></label>
-        <label>Resposta <textarea name="resposta" maxlength="10000" required></textarea></label>
-        <label>Ordem <input name="ordem" type="number" min="0" value="0" required></label>
-        <label class="campo-checkbox"><input name="ativo" type="checkbox" checked> Ativa</label>
-      </fieldset>
-      <button type="submit">Adicionar pergunta</button>
-    </form>
-    <template id="modelo-faq">
-      <article class="cartao">
-        <form hx-put="/api/v1/ia/perguntas-frequentes/__id__" hx-ext="json-enc" hx-swap="none" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-          <label>Pergunta <input name="pergunta" maxlength="500" required></label>
-          <label>Resposta <textarea name="resposta" maxlength="10000" required></textarea></label>
-          <label>Ordem <input name="ordem" type="number" min="0" required></label>
-          <label class="campo-checkbox"><input name="ativo" type="checkbox"> Ativa</label>
-          <button type="submit">Salvar</button>
-        </form>
-        <button type="button" hx-delete="/api/v1/ia/perguntas-frequentes/__id__" hx-swap="none" hx-confirm="Excluir esta pergunta?" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>Excluir</button>
-      </article>
-    </template>
-    <div id="lista-faq" class="pilha-configuracao" hx-get="/api/v1/ia/perguntas-frequentes" hx-trigger="load, faqAlterada from:body" hx-swap="none">
-      <p data-estado="carregando" role="status">Carregando perguntas frequentes...</p>
-      <p data-estado="vazio" hidden>Nenhuma pergunta frequente cadastrada.</p>
-      <p data-estado="erro" hidden>Nao foi possivel carregar as perguntas frequentes.</p>
+    <div class="acoes-cabecalho-conhecimento">
+      {% include "componentes/link_ajuda.html" with topico_ajuda="base-de-conhecimento" %}
+      <button id="abrir-modal-faq" class="botao-novo-conhecimento" type="button">Nova pergunta</button>
     </div>
   </section>
+
+  <section
+    id="lista-faq"
+    class="cartao painel-conhecimentos"
+    hx-get="/api/v1/ia/perguntas-frequentes"
+    hx-trigger="load, faqAlterada from:body"
+    hx-swap="none"
+  >
+    <p data-estado="carregando" role="status">Carregando perguntas frequentes...</p>
+    <p id="estado-vazio-faq" class="estado-vazio-conhecimentos" data-estado="vazio" hidden>Nenhuma pergunta frequente cadastrada.</p>
+    <p class="estado-erro-conhecimentos" data-estado="erro" role="alert" hidden>Nao foi possivel carregar as perguntas frequentes.</p>
+    <div id="regiao-tabela-faq" class="tabela-responsiva" hidden>
+      <table id="tabela-faq">
+        <thead>
+          <tr>
+            <th scope="col">Pergunta</th>
+            <th scope="col">Resposta</th>
+            <th scope="col">Ordem</th>
+            <th scope="col">Status</th>
+            <th scope="col"><span class="somente-leitor">Acoes</span></th>
+          </tr>
+        </thead>
+        <tbody id="corpo-tabela-faq"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <template id="modelo-linha-faq">
+    <tr>
+      <td data-coluna="pergunta"></td>
+      <td class="conteudo-resumido" data-coluna="resposta"></td>
+      <td data-coluna="ordem"></td>
+      <td><span class="status-conhecimento" data-coluna="status"></span></td>
+      <td class="acoes-linha-conhecimento">
+        <button class="botao-secundario" type="button" data-acao="editar">Editar</button>
+        <button class="botao-secundario" type="button" hx-delete="/api/v1/ia/perguntas-frequentes/__id__" hx-swap="none" hx-confirm="Excluir esta pergunta?" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>Excluir</button>
+      </td>
+    </tr>
+  </template>
+
+  <dialog id="modal-faq" class="modal-centralizado" aria-labelledby="titulo-modal-faq">
+    <form id="formulario-faq" class="formulario-configuracao">
+      <header class="cabecalho-modal-conhecimento">
+        <div>
+          <p class="rotulo-pagina">Perguntas frequentes</p>
+          <h2 id="titulo-modal-faq">Nova pergunta</h2>
+        </div>
+        <button class="fechar-modal-conhecimento" type="button" aria-label="Fechar modal">&times;</button>
+      </header>
+      <fieldset>
+        <label>Pergunta <input name="pergunta" maxlength="500" required></label>
+        <label>Ordem <input name="ordem" type="number" min="0" value="0" required></label>
+        <label class="campo-conteudo-conhecimento">Resposta <textarea name="resposta" maxlength="10000" required></textarea></label>
+        <label class="campo-checkbox"><input name="ativo" type="checkbox" checked> Ativa</label>
+      </fieldset>
+      <p id="feedback-faq" role="status" aria-live="polite"></p>
+      <footer class="acoes-modal-conhecimento">
+        <button class="botao-secundario cancelar-modal-conhecimento" type="button">Cancelar</button>
+        <button type="submit">Salvar pergunta</button>
+      </footer>
+    </form>
+  </dialog>
 {% endblock %}
 
 {% block scripts %}
   <script src="{% static 'vendor/htmx.min.js' %}"></script>
-  <script src="{% static 'vendor/htmx-ext-json-enc.js' %}"></script>
   <script>
-    document.body.addEventListener("htmx:afterRequest", (evento) => {
+    (() => {
       const lista = document.querySelector("#lista-faq");
-      if (evento.detail.elt.closest("form") && evento.detail.successful) {
-        htmx.trigger(document.body, "faqAlterada");
-      }
-      if (evento.detail.elt !== lista) return;
-      lista.querySelector('[data-estado="carregando"]').hidden = true;
-      lista.querySelector('[data-estado="erro"]').hidden = evento.detail.successful;
-      if (!evento.detail.successful) return;
-      const dados = JSON.parse(evento.detail.xhr.responseText);
-      lista.querySelector('[data-estado="vazio"]').hidden = dados.total !== 0;
-      lista.querySelectorAll("article").forEach((item) => item.remove());
-      dados.itens.forEach((item) => {
-        const artigo = document.querySelector("#modelo-faq").content.firstElementChild.cloneNode(true);
-        const formulario = artigo.querySelector("form");
-        const excluir = artigo.querySelector("button[hx-delete]");
-        formulario.setAttribute("hx-put", `/api/v1/ia/perguntas-frequentes/${item.id}`);
-        excluir.setAttribute("hx-delete", `/api/v1/ia/perguntas-frequentes/${item.id}`);
+      const vazio = document.querySelector("#estado-vazio-faq");
+      const regiaoTabela = document.querySelector("#regiao-tabela-faq");
+      const corpoTabela = document.querySelector("#corpo-tabela-faq");
+      const modal = document.querySelector("#modal-faq");
+      const formulario = document.querySelector("#formulario-faq");
+      const tituloModal = document.querySelector("#titulo-modal-faq");
+      const feedback = document.querySelector("#feedback-faq");
+      const csrf = "{{ csrf_token }}";
+
+      const prepararCriacao = () => {
+        formulario.reset();
+        formulario.dataset.perguntaId = "";
+        formulario.elements.ordem.value = "0";
+        formulario.elements.ativo.checked = true;
+        tituloModal.textContent = "Nova pergunta";
+        feedback.textContent = "";
+        modal.showModal();
+        formulario.elements.pergunta.focus();
+      };
+
+      const prepararEdicao = (item) => {
+        formulario.dataset.perguntaId = item.id;
         formulario.elements.pergunta.value = item.pergunta;
         formulario.elements.resposta.value = item.resposta;
         formulario.elements.ordem.value = item.ordem;
         formulario.elements.ativo.checked = item.ativo;
-        lista.appendChild(artigo);
-        htmx.process(artigo);
+        tituloModal.textContent = "Editar pergunta";
+        feedback.textContent = "";
+        modal.showModal();
+        formulario.elements.pergunta.focus();
+      };
+
+      document.querySelector("#abrir-modal-faq").addEventListener("click", prepararCriacao);
+      document.querySelectorAll(".fechar-modal-conhecimento, .cancelar-modal-conhecimento").forEach((botao) => {
+        botao.addEventListener("click", () => modal.close());
       });
-    });
+
+      formulario.addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+        const perguntaId = formulario.dataset.perguntaId;
+        const resposta = await fetch(
+          perguntaId ? `/api/v1/ia/perguntas-frequentes/${perguntaId}` : "/api/v1/ia/perguntas-frequentes",
+          {
+            method: perguntaId ? "PUT" : "POST",
+            credentials: "same-origin",
+            headers: {"Content-Type": "application/json", "X-CSRFToken": csrf},
+            body: JSON.stringify({
+              pergunta: formulario.elements.pergunta.value,
+              resposta: formulario.elements.resposta.value,
+              ordem: Number(formulario.elements.ordem.value),
+              ativo: formulario.elements.ativo.checked
+            })
+          }
+        );
+        if (!resposta.ok) {
+          const dados = await resposta.json();
+          feedback.textContent = dados.mensagem || "Nao foi possivel salvar a pergunta.";
+          return;
+        }
+        modal.close();
+        htmx.trigger(document.body, "faqAlterada");
+      });
+
+      document.body.addEventListener("htmx:afterRequest", (evento) => {
+        if (evento.detail.elt.closest("[hx-delete]") && evento.detail.successful) {
+          htmx.trigger(document.body, "faqAlterada");
+        }
+        if (evento.detail.elt !== lista) return;
+        lista.querySelector('[data-estado="carregando"]').hidden = true;
+        lista.querySelector('[data-estado="erro"]').hidden = evento.detail.successful;
+        if (!evento.detail.successful) {
+          vazio.hidden = true;
+          regiaoTabela.hidden = true;
+          return;
+        }
+
+        const dados = JSON.parse(evento.detail.xhr.responseText);
+        const semDados = dados.total === 0;
+        vazio.hidden = !semDados;
+        regiaoTabela.hidden = semDados;
+        corpoTabela.replaceChildren();
+        dados.itens.forEach((item) => {
+          const linha = document.querySelector("#modelo-linha-faq").content.firstElementChild.cloneNode(true);
+          linha.querySelector('[data-coluna="pergunta"]').textContent = item.pergunta;
+          linha.querySelector('[data-coluna="resposta"]').textContent = item.resposta;
+          linha.querySelector('[data-coluna="ordem"]').textContent = item.ordem;
+          const status = linha.querySelector('[data-coluna="status"]');
+          status.textContent = item.ativo ? "Ativa" : "Inativa";
+          status.dataset.ativo = item.ativo;
+          linha.querySelector('[data-acao="editar"]').addEventListener("click", () => prepararEdicao(item));
+          const excluir = linha.querySelector("[hx-delete]");
+          excluir.setAttribute("hx-delete", `/api/v1/ia/perguntas-frequentes/${item.id}`);
+          corpoTabela.appendChild(linha);
+          htmx.process(linha);
+        });
+      });
+    })();
   </script>
 {% endblock %}

@@ -66,12 +66,36 @@ def test_pagina_documentos_usa_modal_e_tabela_somente_quando_ha_dados() -> None:
     assert resposta.status_code == 200
     assert b'id="abrir-modal-conhecimento"' in resposta.content
     assert b'class="botao-novo-conhecimento"' in resposta.content
-    assert b'<dialog id="modal-conhecimento"' in resposta.content
+    assert (
+        b'<dialog id="modal-conhecimento" class="modal-centralizado"'
+        in resposta.content
+    )
     assert b'id="formulario-conhecimento"' in resposta.content
     assert b'<table id="tabela-conhecimentos"' in resposta.content
     assert b'<tbody id="corpo-tabela-conhecimentos">' in resposta.content
     assert b'id="estado-vazio-conhecimentos"' in resposta.content
     assert b"dados.total === 0" in resposta.content
+
+
+@pytest.mark.django_db
+def test_pagina_faq_usa_modal_centralizado_e_tabela_somente_com_dados() -> None:
+    """Mantem cadastro e edicao no modal e separa tabela do estado vazio."""
+    resposta = _cliente_autenticado("layout-faq@example.com").get(
+        "/ia/perguntas-frequentes/"
+    )
+
+    assert resposta.status_code == 200
+    assert b'id="abrir-modal-faq"' in resposta.content
+    assert b'class="botao-novo-conhecimento"' in resposta.content
+    assert b'<dialog id="modal-faq" class="modal-centralizado"' in resposta.content
+    assert b'id="formulario-faq"' in resposta.content
+    assert b'<table id="tabela-faq"' in resposta.content
+    assert b'<tbody id="corpo-tabela-faq">' in resposta.content
+    assert b'id="estado-vazio-faq"' in resposta.content
+    assert (
+        b'id="regiao-tabela-faq" class="tabela-responsiva" hidden' in resposta.content
+    )
+    assert b"const semDados = dados.total === 0" in resposta.content
 
 
 @pytest.mark.django_db
@@ -82,8 +106,8 @@ def test_pagina_faq_consume_api_e_sidebar_exibe_acessos() -> None:
     sidebar = cliente.get("/perfil/")
     assert resposta.status_code == 200
     assert b'hx-get="/api/v1/ia/perguntas-frequentes"' in resposta.content
-    assert b'hx-post="/api/v1/ia/perguntas-frequentes"' in resposta.content
-    assert b'hx-put="/api/v1/ia/perguntas-frequentes/__id__"' in resposta.content
+    assert b'"/api/v1/ia/perguntas-frequentes"' in resposta.content
+    assert b"/api/v1/ia/perguntas-frequentes/" in resposta.content
     assert b'hx-delete="/api/v1/ia/perguntas-frequentes/__id__"' in resposta.content
     assert b"/ajuda/base-de-conhecimento/" in resposta.content
     assert b'href="/ia/conhecimentos/"' in sidebar.content
