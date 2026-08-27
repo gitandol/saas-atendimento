@@ -119,8 +119,6 @@ EVOLUTION_INTERNAL_URL = os.getenv(
 ).rstrip("/")
 WHATSAPP_HOSTS_INTERNOS_PERMITIDOS = frozenset(
     host.strip().rstrip(".").lower()
-    for host in os.getenv(
-        "WHATSAPP_HOSTS_INTERNOS_PERMITIDOS", "evolution"
-    ).split(",")
+    for host in os.getenv("WHATSAPP_HOSTS_INTERNOS_PERMITIDOS", "evolution").split(",")
     if host.strip()
 )

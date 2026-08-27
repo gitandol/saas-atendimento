@@ -88,6 +88,7 @@ services:
       SERVER_URL: ${EVOLUTION_INTERNAL_URL:-http://evolution:8080}
       AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-evolution-local-api-key}
       DATABASE_PROVIDER: postgresql
+      # Credenciais interpoladas devem usar o alfabeto URL-safe documentado no .env.example.
       DATABASE_CONNECTION_URI: postgresql://${EVOLUTION_POSTGRES_USER:-evolution}:${EVOLUTION_POSTGRES_PASSWORD:-evolution-local}@evolution-postgres:5432/${EVOLUTION_POSTGRES_DB:-evolution}?schema=evolution_api
       DATABASE_CONNECTION_CLIENT_NAME: saas_atendimento
       CACHE_REDIS_ENABLED: "true"

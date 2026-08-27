@@ -8,6 +8,7 @@ from urllib.parse import urlsplit
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.validators import URLValidator
 from django.db import transaction
 
 from apps.auditoria.models import EventoAuditoria
@@ -32,6 +33,9 @@ from apps.whatsapp.services.criptografia import (
 
 class ConfiguracaoWhatsAppInvalida(Exception):
     """Indica que destino ou identificadores nao sao seguros e validos."""
+
+
+_validar_url_http = URLValidator(schemes=["http", "https"])
 
 
 @dataclass(frozen=True)
@@ -125,6 +129,16 @@ def _validar_url(url_base: str) -> str:
         raise ConfiguracaoWhatsAppInvalida(
             "A URL da Evolution deve usar HTTPS ou um host interno permitido."
         )
+    url_para_validar = valor
+    if host_interno and "." not in hostname.rstrip("."):
+        netloc = f"{hostname.rstrip('.')}.invalid"
+        if porta is not None:
+            netloc = f"{netloc}:{porta}"
+        url_para_validar = partes._replace(netloc=netloc).geturl()
+    try:
+        _validar_url_http(url_para_validar)
+    except ValidationError as erro:
+        raise ConfiguracaoWhatsAppInvalida("A URL da Evolution e invalida.") from erro
 
     host = hostname.rstrip(".").lower()
     nomes_bloqueados = {
@@ -194,17 +208,7 @@ def atualizar_configuracao(
         configuracao.chave_api_criptografada = criptografar_chave(
             dados.chave_api.strip()
         )
-    try:
-        configuracao.full_clean()
-    except ValidationError as erro:
-        hostname = urlsplit(url_base).hostname
-        if (
-            not hostname
-            or not _host_interno_permitido(hostname)
-            or set(erro.message_dict) != {"url_base"}
-        ):
-            raise
-        configuracao.full_clean(exclude=["url_base"])
+    configuracao.full_clean(exclude=["url_base"])
     configuracao.save()
     depois = _snapshot(configuracao)
     campos_alterados = [

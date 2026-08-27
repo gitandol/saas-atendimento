@@ -44,6 +44,21 @@ class ClienteHTTP(Protocol):
 Resolvedor = Callable[[str, int], set[str]]
 
 
+def _endereco_privado_seguro(
+    endereco: ipaddress.IPv4Address | ipaddress.IPv6Address,
+) -> bool:
+    """Aceita somente redes privadas sem classes especiais de endereco."""
+    return (
+        endereco.is_private
+        and not endereco.is_global
+        and not endereco.is_loopback
+        and not endereco.is_link_local
+        and not endereco.is_multicast
+        and not endereco.is_unspecified
+        and not endereco.is_reserved
+    )
+
+
 def _resolver_enderecos(host: str, porta: int) -> set[str]:
     """Resolve todos os enderecos usados para validar o destino externo."""
     try:
@@ -134,6 +149,10 @@ class ProviderEvolution:
             raise WhatsAppIndisponivel(
                 "A Evolution API resolveu para um endereco invalido."
             ) from erro
+        if host_interno and any(
+            not _endereco_privado_seguro(destino) for destino in destinos
+        ):
+            raise WhatsAppIndisponivel("O destino da Evolution API nao e permitido.")
         if not host_interno and any(not destino.is_global for destino in destinos):
             raise WhatsAppIndisponivel("O destino da Evolution API nao e permitido.")
 

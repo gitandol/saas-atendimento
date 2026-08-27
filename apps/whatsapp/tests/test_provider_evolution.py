@@ -244,6 +244,40 @@ def test_provider_aceita_dns_privado_somente_para_host_interno_permitido() -> No
     assert provider.consultar_estado() == EstadoConexao.CONECTADO
 
 
+@pytest.mark.parametrize(
+    "endereco_resolvido",
+    ["127.0.0.1", "169.254.169.254", "::1"],
+)
+def test_provider_recusa_hostname_interno_resolvido_para_destino_inseguro(
+    endereco_resolvido: str,
+) -> None:
+    """Nao amplia a allowlist de hostname para loopback ou metadata."""
+    from apps.whatsapp.integrations.evolution import ProviderEvolution
+    from apps.whatsapp.integrations.protocolos import WhatsAppIndisponivel
+
+    cliente = ClienteHTTPFalso(
+        [
+            RespostaHTTPFalsa(
+                200,
+                {"instance": {"state": "open"}},
+                content=b'{"instance":{"state":"open"}}',
+            )
+        ]
+    )
+    provider = ProviderEvolution(
+        url_base="http://evolution:8080",
+        nome_instancia="empresa-1",
+        chave_api="chave",
+        cliente=cliente,
+        resolvedor=lambda _host, _porta: {endereco_resolvido},
+        hosts_internos_permitidos=frozenset({"evolution"}),
+    )
+
+    with pytest.raises(WhatsAppIndisponivel):
+        provider.consultar_estado()
+    assert cliente.chamadas == []
+
+
 def test_provider_recusa_http_para_host_externo_antes_da_chamada() -> None:
     """Impede HTTP direto para host global fora da allowlist gerenciada."""
     from apps.whatsapp.integrations.evolution import ProviderEvolution

@@ -4,7 +4,7 @@ Esta pagina conecta uma unica instancia do WhatsApp por empresa usando a Evoluti
 
 ## Configurar
 
-Informe a URL publica da Evolution API, o nome da instancia e a chave API. Em producao, a URL deve usar HTTPS e nao pode apontar para enderecos locais, privados ou de metadata. A chave e criptografada antes de ser armazenada e nunca volta pela API.
+Informe a URL publica da Evolution API, o nome da instancia e a chave API. Em producao, a URL deve usar HTTPS e nao pode apontar para enderecos locais, privados ou de metadata. A unica excecao e o servico gerenciado no mesmo Docker Compose, que usa exclusivamente `http://evolution:8080`. A chave e criptografada antes de ser armazenada e nunca volta pela API.
 
 ## Conectar e consultar
 

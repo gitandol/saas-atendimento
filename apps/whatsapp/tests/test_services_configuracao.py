@@ -199,6 +199,49 @@ def test_configuracao_aceita_http_apenas_para_host_interno_permitido(settings) -
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("url_base", "host_permitido"),
+    [
+        ("http://evolution:8080/caminho invalido", "evolution"),
+        ("http://evo_lution:8080", "evo_lution"),
+    ],
+)
+def test_configuracao_recusa_url_interna_malformada(
+    settings, url_base: str, host_permitido: str
+) -> None:
+    """Mantem as invariantes do URLField ao aceitar hostname sem TLD."""
+    from apps.whatsapp.models import ConfiguracaoWhatsApp
+    from apps.whatsapp.services.configurar_instancia import (
+        ConfiguracaoWhatsAppInvalida,
+        DadosConfiguracaoWhatsApp,
+        atualizar_configuracao,
+    )
+
+    settings.IA_CHAVE_CRIPTOGRAFIA = "mestre-url-interna-invalida"
+    settings.WHATSAPP_HOSTS_INTERNOS_PERMITIDOS = frozenset({host_permitido})
+    empresa = Empresa.objects.create(nome="Empresa URL interna invalida")
+    ator = _membro(
+        empresa,
+        MembroEmpresa.Papel.ADMINISTRADOR,
+        "url-interna-invalida@example.com",
+    )
+    dados = DadosConfiguracaoWhatsApp(
+        url_base=url_base,
+        nome_instancia="instancia-interna",
+        chave_api="chave",
+    )
+
+    with pytest.raises(ConfiguracaoWhatsAppInvalida):
+        atualizar_configuracao(
+            empresa=empresa,
+            ator=ator,
+            dados=dados,
+            correlacao="url-interna-invalida",
+        )
+    assert not ConfiguracaoWhatsApp.objects.filter(empresa=empresa).exists()
+
+
+@pytest.mark.django_db
 def test_configuracao_vazia_publica_url_interna_padrao(settings) -> None:
     """Preenche a tela inicial sem expor qualquer credencial."""
     from apps.whatsapp.services.configurar_instancia import obter_configuracao
