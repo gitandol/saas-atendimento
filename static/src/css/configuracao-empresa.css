@@ -86,8 +86,8 @@
 }
 
 .indicador-conexao[data-estado="ERRO"] {
-  background: color-mix(in srgb, #dc2626 14%, transparent);
-  color: #b91c1c;
+  background: color-mix(in srgb, var(--cor-perigo) 14%, transparent);
+  color: var(--cor-perigo);
 }
 
 .formulario-configuracao {

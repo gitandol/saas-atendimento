@@ -90,3 +90,12 @@ def test_paleta_vibrante_atende_contraste_wcag_aa(
 
     assert _contraste(primaria, superficie) >= 4.5
     assert _contraste(primaria, sobre_primaria) >= 4.5
+
+
+def test_indicador_de_erro_whatsapp_respeita_cor_de_perigo_do_tema() -> None:
+    """Evita texto de erro fixo e ilegivel quando o tema escuro esta ativo."""
+    css = Path("static/src/css/configuracao-empresa.css").read_text(encoding="utf-8")
+    bloco = _bloco(css, '.indicador-conexao[data-estado="ERRO"]')
+
+    assert "color: var(--cor-perigo)" in bloco
+    assert "var(--cor-perigo)" in bloco.split("color:", maxsplit=1)[0]
