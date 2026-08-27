@@ -49,3 +49,24 @@ class EventoMensagemRecebida:
 - Falha de Celery após persistência pode ser reprocessada de forma segura.
 
 **Commit sugerido:** `feat: recebe mensagens evolution com idempotencia`
+
+## Registro de execução
+
+- Data: 2026-08-27
+- Vermelho observado: 12 falhas iniciais pela ausencia dos services, task e
+  endpoint; a rota respondia 404. A mutacao com import direto de task no endpoint
+  tambem falhou como esperado no teste de fronteira.
+- Implementação realizada: autenticacao HMAC por empresa, validacao HTTP com
+  limite de 256 KiB, normalizacao textual, persistencia idempotente de contato,
+  conversa e mensagem, bloqueio de loop para mensagens da instancia, publicacao
+  Celery recuperavel e documentacao do webhook.
+- Refatorações: lease atomico e marcadores de reivindicacao/publicacao permitem
+  repetir apos falha ou queda antes do broker sem duplicacao concorrente;
+  excecoes HTTP especificas evitam mascarar erros internos; logs estruturados
+  nao incluem texto ou token.
+- Comandos e resultados: 15 testes novos e 98 testes dos modulos afetados
+  passaram; suíte completa com 288 testes passou; `ruff check .`,
+  `ruff format --check .`, `python manage.py check`,
+  `makemigrations --check --dry-run`, migrações e os 2 contratos do
+  Import Linter passaram.
+- Commit: `feat: recebe mensagens evolution com idempotencia`

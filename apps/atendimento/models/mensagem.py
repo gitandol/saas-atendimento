@@ -54,6 +54,8 @@ class Mensagem(models.Model):
     erro_sanitizado = models.CharField(max_length=500, blank=True, default="")
     enviado_em = models.DateTimeField(null=True, blank=True)
     entregue_em = models.DateTimeField(null=True, blank=True)
+    processamento_enfileirado = models.BooleanField(default=False)
+    processamento_enfileirado_em = models.DateTimeField(null=True, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 

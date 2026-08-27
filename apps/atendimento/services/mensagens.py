@@ -29,6 +29,8 @@ def mensagem_para_dto(mensagem: Mensagem) -> MensagemDTO:
         erro_sanitizado=mensagem.erro_sanitizado,
         enviado_em=mensagem.enviado_em,
         entregue_em=mensagem.entregue_em,
+        processamento_enfileirado=mensagem.processamento_enfileirado,
+        processamento_enfileirado_em=mensagem.processamento_enfileirado_em,
         criado_em=mensagem.criado_em,
     )
 
@@ -47,6 +49,12 @@ def snapshot_mensagem(mensagem: Mensagem) -> dict[str, Any]:
         "entregue_em": (
             mensagem.entregue_em.isoformat() if mensagem.entregue_em else None
         ),
+        "processamento_enfileirado_em": (
+            mensagem.processamento_enfileirado_em.isoformat()
+            if mensagem.processamento_enfileirado_em
+            else None
+        ),
+        "processamento_enfileirado": mensagem.processamento_enfileirado,
     }
 
 

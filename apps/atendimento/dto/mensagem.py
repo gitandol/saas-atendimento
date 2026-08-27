@@ -19,4 +19,6 @@ class MensagemDTO:
     erro_sanitizado: str
     enviado_em: datetime | None
     entregue_em: datetime | None
+    processamento_enfileirado: bool
+    processamento_enfileirado_em: datetime | None
     criado_em: datetime
