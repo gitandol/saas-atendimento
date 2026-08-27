@@ -22,15 +22,15 @@
 
 ## Ciclo TDD
 
-- [ ] Testar unicidade de contato por `empresa + numero_normalizado` e de mensagem externa por `empresa + identificador_externo`.
-- [ ] Testar abertura/reabertura da conversa e atualização atômica de última mensagem/não lidas.
-- [ ] Testar ordenação estável por data e UUID, isolamento e exclusão lógica.
-- [ ] Testar que texto vazio ou acima de 4.096 caracteres é rejeitado para envio do MVP.
-- [ ] Confirmar falhas antes da implementação.
-- [ ] Implementar enums, constraints e índices para lista de conversas e idempotência.
-- [ ] Implementar serviços transacionais com ator, origem e correlação para auditoria.
-- [ ] Fazer services de consulta retornarem dataclasses/DTOs do domínio, sem retornar QuerySets para endpoints ou depender de schemas Django Ninja.
-- [ ] Executar migrations, explicar o plano dos índices e rodar regressão.
+- [x] Testar unicidade de contato por `empresa + numero_normalizado` e de mensagem externa por `empresa + identificador_externo`.
+- [x] Testar abertura/reabertura da conversa e atualização atômica de última mensagem/não lidas.
+- [x] Testar ordenação estável por data e UUID, isolamento e exclusão lógica.
+- [x] Testar que texto vazio ou acima de 4.096 caracteres é rejeitado para envio do MVP.
+- [x] Confirmar falhas antes da implementação.
+- [x] Implementar enums, constraints e índices para lista de conversas e idempotência.
+- [x] Implementar serviços transacionais com ator, origem e correlação para auditoria.
+- [x] Fazer services de consulta retornarem dataclasses/DTOs do domínio, sem retornar QuerySets para endpoints ou depender de schemas Django Ninja.
+- [x] Executar migrations, explicar o plano dos índices e rodar regressão.
 
 ## Critérios de aceite
 
@@ -39,3 +39,23 @@
 - Consultas públicas sempre recebem empresa ativa.
 
 **Commit sugerido:** `feat: cria dominio de atendimento`
+
+## Registro de execução
+
+- Data: 2026-08-27.
+- Vermelho observado: 6 falhas pela ausência dos modelos, 8 pela ausência dos
+  services e 4 pela ausência das consultas; o limite de 4.096 caracteres também
+  falhou antes da validação explícita.
+- Implementação realizada: app `atendimento` com modelos UUID, enums,
+  constraints, índices, migração, DTOs imutáveis, factories, services
+  transacionais auditados e consultas isoladas por empresa.
+- Plano dos índices: contatos usam empresa, exclusão e número para busca ativa;
+  conversas usam empresa, estado e atualização decrescente para a caixa de
+  entrada; mensagens usam empresa, conversa, data e UUID para histórico, além
+  de índices únicos parciais para conversa aberta e identificador externo.
+- Refatorações: snapshots de mensagem não guardam texto, mapeamentos retornam
+  DTOs e a ordem de locks começa pela empresa para reduzir risco de deadlock.
+- Comandos e resultados: testes do módulo `25 passed`; migração aplicada;
+  `ruff check .` aprovado; `ruff format --check .` aprovou 269 arquivos;
+  `manage.py check` sem problemas; suíte completa `273 passed`.
+- Commit: `feat: cria dominio de atendimento`.
