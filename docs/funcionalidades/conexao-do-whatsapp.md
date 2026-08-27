@@ -11,3 +11,7 @@ Informe a URL publica da Evolution API, o nome da instancia e a chave API. Em pr
 Use **Conectar** para iniciar a instancia e depois **Exibir QR Code**. Leia o codigo no aplicativo WhatsApp antes que ele desapareca da tela em 60 segundos. O sistema consulta o estado periodicamente e mostra se a instancia esta desconectada, aguardando QR Code, conectada ou com erro.
 
 Use **Desconectar** para encerrar a sessao atual. As acoes de configurar, conectar e desconectar pedem confirmacao quando necessario e ficam registradas na auditoria, sem chave API ou QR Code.
+
+## Evolution local
+
+No ambiente Docker do projeto, use `http://evolution:8080` como URL base. A chave API é o valor de `EVOLUTION_API_KEY` do arquivo `.env`. A porta `http://localhost:8080` serve somente para diagnóstico no computador que executa os containers.
