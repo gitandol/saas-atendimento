@@ -18,6 +18,40 @@
   </section>
 
   <section id="carregador-whatsapp" class="pilha-configuracao" hx-get="/api/v1/whatsapp/configuracao" hx-trigger="load" hx-swap="none">
+    <section id="resumo-conexao-whatsapp" class="cartao resumo-conexao" aria-labelledby="titulo-resumo-conexao">
+      <div class="cabecalho-resumo-conexao">
+        <div>
+          <p class="rotulo-pagina">Visao geral</p>
+          <h2 id="titulo-resumo-conexao">Resumo da conexao</h2>
+        </div>
+        <p>Informacoes atuais da instancia configurada.</p>
+      </div>
+      <div class="envoltorio-tabela-resumo">
+        <table class="tabela-resumo-conexao">
+          <thead>
+            <tr>
+              <th scope="col">Estado</th>
+              <th scope="col">Instancia</th>
+              <th scope="col">URL da Evolution</th>
+              <th scope="col">Chave configurada</th>
+              <th scope="col">Ativa</th>
+              <th scope="col">Ultima atualizacao</th>
+            </tr>
+          </thead>
+          <tbody aria-live="polite" aria-atomic="false">
+            <tr>
+              <td data-rotulo="Estado"><span id="resumo-estado-whatsapp" class="indicador-conexao" data-estado="DESCONECTADO">Desconectado</span></td>
+              <td id="resumo-instancia-whatsapp" data-rotulo="Instancia">Nao configurada</td>
+              <td id="resumo-url-whatsapp" data-rotulo="URL da Evolution">Nao configurada</td>
+              <td data-rotulo="Chave configurada"><span id="resumo-chave-whatsapp" class="indicador-binario" data-positivo="false">Nao</span></td>
+              <td data-rotulo="Ativa"><span id="resumo-ativa-whatsapp" class="indicador-binario" data-positivo="false">Nao</span></td>
+              <td id="resumo-atualizado-whatsapp" data-rotulo="Ultima atualizacao">Ainda nao</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <form
       id="formulario-whatsapp"
       class="cartao formulario-configuracao"
@@ -89,14 +123,49 @@
       const estadoChave = document.querySelector("#estado-chave-whatsapp");
       const figuraQr = document.querySelector("#qrcode-whatsapp");
       const imagemQr = figuraQr.querySelector("img");
+      const resumo = {
+        estado: document.querySelector("#resumo-estado-whatsapp"),
+        instancia: document.querySelector("#resumo-instancia-whatsapp"),
+        url: document.querySelector("#resumo-url-whatsapp"),
+        chave: document.querySelector("#resumo-chave-whatsapp"),
+        ativa: document.querySelector("#resumo-ativa-whatsapp"),
+        atualizado: document.querySelector("#resumo-atualizado-whatsapp"),
+      };
+      const rotulosEstado = {
+        DESCONECTADO: "Desconectado",
+        AGUARDANDO_QR: "Aguardando QR",
+        CONECTADO: "Conectado",
+        ERRO: "Erro",
+      };
       let temporizadorQr;
 
+      const formatarAtualizacao = (valor) => {
+        if (!valor) return "Ainda nao";
+        const data = new Date(valor);
+        if (Number.isNaN(data.getTime())) return "Ainda nao";
+        return new Intl.DateTimeFormat("pt-BR", {
+          dateStyle: "short",
+          timeStyle: "short",
+        }).format(data);
+      };
+
       const publicarConfiguracao = (dados) => {
+        const estadoAtual = dados.estado || "DESCONECTADO";
+        const estadoLegivel = rotulosEstado[estadoAtual] || estadoAtual.toLowerCase().replaceAll("_", " ");
         formulario.elements.url_base.value = dados.url_base || "";
         formulario.elements.nome_instancia.value = dados.nome_instancia || "";
         formulario.elements.chave_api.value = "";
         estadoChave.textContent = dados.chave_configurada ? "Chave configurada." : "Nenhuma chave configurada.";
-        estado.textContent = `Estado: ${(dados.estado || "DESCONECTADO").toLowerCase().replaceAll("_", " ")}`;
+        estado.textContent = `Estado: ${estadoLegivel.toLowerCase()}`;
+        resumo.estado.textContent = estadoLegivel;
+        resumo.estado.dataset.estado = estadoAtual;
+        resumo.instancia.textContent = dados.nome_instancia || "Nao configurada";
+        resumo.url.textContent = dados.url_base || "Nao configurada";
+        resumo.chave.textContent = dados.chave_configurada ? "Sim" : "Nao";
+        resumo.chave.dataset.positivo = String(Boolean(dados.chave_configurada));
+        resumo.ativa.textContent = dados.ativo ? "Sim" : "Nao";
+        resumo.ativa.dataset.positivo = String(Boolean(dados.ativo));
+        resumo.atualizado.textContent = formatarAtualizacao(dados.atualizado_em);
       };
 
       document.body.addEventListener("htmx:afterRequest", (evento) => {

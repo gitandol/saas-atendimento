@@ -38,6 +38,42 @@ def test_pagina_shell_consume_api_exibe_ajuda_e_confirma_acoes() -> None:
 
 
 @pytest.mark.django_db
+def test_pagina_destaca_resumo_da_conexao_antes_do_formulario() -> None:
+    """Mantem as informacoes operacionais visiveis e semanticamente agrupadas."""
+    usuario = Usuario.objects.create_user(email="resumo-whatsapp@example.com")
+    cliente = Client()
+    cliente.force_login(usuario)
+
+    resposta = cliente.get("/whatsapp/configuracao/")
+    conteudo = resposta.content
+
+    assert resposta.status_code == 200
+    assert conteudo.index(b'id="resumo-conexao-whatsapp"') < conteudo.index(
+        b'id="formulario-whatsapp"'
+    )
+    assert b'<table class="tabela-resumo-conexao">' in conteudo
+    assert b'aria-live="polite"' in conteudo
+    for rotulo in (
+        b"Estado",
+        b"Instancia",
+        b"URL da Evolution",
+        b"Chave configurada",
+        b"Ativa",
+        b"Ultima atualizacao",
+    ):
+        assert rotulo in conteudo
+    for identificador in (
+        b"resumo-estado-whatsapp",
+        b"resumo-instancia-whatsapp",
+        b"resumo-url-whatsapp",
+        b"resumo-chave-whatsapp",
+        b"resumo-ativa-whatsapp",
+        b"resumo-atualizado-whatsapp",
+    ):
+        assert identificador in conteudo
+
+
+@pytest.mark.django_db
 def test_sidebar_exibe_acesso_ao_whatsapp() -> None:
     """Mantem a conexao WhatsApp acessivel na navegacao autenticada."""
     usuario = Usuario.objects.create_user(email="sidebar-whatsapp@example.com")

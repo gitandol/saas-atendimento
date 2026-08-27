@@ -3,6 +3,93 @@
   gap: 1rem;
 }
 
+.resumo-conexao {
+  display: grid;
+  gap: 1rem;
+  border-color: color-mix(in srgb, var(--cor-primaria) 45%, var(--cor-borda));
+  background: color-mix(in srgb, var(--cor-primaria) 5%, var(--cor-superficie));
+}
+
+.cabecalho-resumo-conexao {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cabecalho-resumo-conexao h2,
+.cabecalho-resumo-conexao p {
+  margin: 0;
+}
+
+.cabecalho-resumo-conexao > p {
+  color: var(--cor-texto-suave);
+}
+
+.envoltorio-tabela-resumo {
+  overflow-x: auto;
+  border: 1px solid var(--cor-borda);
+  border-radius: 0.75rem;
+  background: var(--cor-superficie);
+}
+
+.tabela-resumo-conexao {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela-resumo-conexao th,
+.tabela-resumo-conexao td {
+  padding: 0.8rem 0.9rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.tabela-resumo-conexao th {
+  border-bottom: 1px solid var(--cor-borda);
+  color: var(--cor-texto-suave);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
+}
+
+.tabela-resumo-conexao td {
+  max-width: 20rem;
+  color: var(--cor-texto);
+  overflow-wrap: anywhere;
+}
+
+.indicador-conexao,
+.indicador-binario {
+  display: inline-flex;
+  min-height: 1.8rem;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cor-texto-suave) 12%, transparent);
+  color: var(--cor-texto-suave);
+  font-size: 0.82rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.indicador-conexao[data-estado="CONECTADO"],
+.indicador-binario[data-positivo="true"] {
+  background: color-mix(in srgb, var(--cor-sucesso) 15%, transparent);
+  color: var(--cor-sucesso);
+}
+
+.indicador-conexao[data-estado="AGUARDANDO_QR"] {
+  background: color-mix(in srgb, var(--cor-alerta) 15%, transparent);
+  color: var(--cor-alerta);
+}
+
+.indicador-conexao[data-estado="ERRO"] {
+  background: color-mix(in srgb, #dc2626 14%, transparent);
+  color: #b91c1c;
+}
+
 .formulario-configuracao {
   display: grid;
   gap: 1.25rem;
@@ -88,6 +175,64 @@
 }
 
 @media (max-width: 767px) {
+  .cabecalho-resumo-conexao {
+    display: grid;
+    align-items: start;
+  }
+
+  .envoltorio-tabela-resumo {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .tabela-resumo-conexao,
+  .tabela-resumo-conexao tbody,
+  .tabela-resumo-conexao tr,
+  .tabela-resumo-conexao td {
+    display: block;
+    width: 100%;
+  }
+
+  .tabela-resumo-conexao thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .tabela-resumo-conexao tr {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .tabela-resumo-conexao td {
+    display: flex;
+    max-width: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem;
+    border: 1px solid var(--cor-borda);
+    border-radius: 0.65rem;
+    background: var(--cor-superficie);
+    text-align: right;
+  }
+
+  .tabela-resumo-conexao td::before {
+    content: attr(data-rotulo);
+    flex: 0 0 auto;
+    color: var(--cor-texto-suave);
+    font-size: 0.78rem;
+    font-weight: 750;
+    letter-spacing: 0.035em;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
   .formulario-configuracao fieldset {
     grid-template-columns: 1fr;
   }
