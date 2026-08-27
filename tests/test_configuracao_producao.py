@@ -55,3 +55,29 @@ def test_producao_mantem_debug_desabilitado() -> None:
     )
     assert resultado.returncode == 0
     assert resultado.stdout.strip() == "False"
+
+
+def test_settings_normalizam_hosts_internos_permitidos() -> None:
+    """Normaliza caixa, espaços, ponto final e entradas vazias da allowlist."""
+    ambiente = os.environ.copy()
+    ambiente["WHATSAPP_HOSTS_INTERNOS_PERMITIDOS"] = (
+        " Evolution. , OUTRO.INTERNO ,, "
+    )
+    resultado = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            (
+                "from config.settings.base import "
+                "WHATSAPP_HOSTS_INTERNOS_PERMITIDOS as hosts; "
+                "print(','.join(sorted(hosts)))"
+            ),
+        ],
+        check=False,
+        capture_output=True,
+        env=ambiente,
+        text=True,
+    )
+
+    assert resultado.returncode == 0
+    assert resultado.stdout.strip() == "evolution,outro.interno"

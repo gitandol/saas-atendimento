@@ -222,6 +222,28 @@ def test_provider_recusa_hostname_resolvido_para_rede_privada_antes_da_chamada()
     assert cliente.chamadas == []
 
 
+def test_provider_aceita_dns_privado_somente_para_host_interno_permitido() -> None:
+    """Permite a rede Docker explicitamente confiada e preserva o bloqueio geral."""
+    from apps.whatsapp.integrations.evolution import ProviderEvolution
+    from apps.whatsapp.integrations.protocolos import EstadoConexao
+
+    resposta = RespostaHTTPFalsa(
+        200,
+        {"instance": {"state": "open"}},
+        content=b'{"instance":{"state":"open"}}',
+    )
+    provider = ProviderEvolution(
+        url_base="http://evolution:8080",
+        nome_instancia="empresa-1",
+        chave_api="chave",
+        cliente=ClienteHTTPFalso([resposta]),
+        resolvedor=lambda _host, _porta: {"172.20.0.5"},
+        hosts_internos_permitidos=frozenset({"evolution"}),
+    )
+
+    assert provider.consultar_estado() == EstadoConexao.CONECTADO
+
+
 def test_provider_desabilita_redirects_para_impedir_salto_ssrf() -> None:
     """Nao segue redirecionamento externo para um destino nao validado."""
     from apps.whatsapp.integrations.protocolos import WhatsAppIndisponivel

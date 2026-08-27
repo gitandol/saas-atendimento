@@ -68,6 +68,7 @@ class ProviderEvolution:
         resolvedor: Resolvedor | None = None,
         timeout: float = 15.0,
         limite_resposta: int = 1_000_000,
+        hosts_internos_permitidos: frozenset[str] | None = None,
     ) -> None:
         """Configura destino, credencial e limites explicitos do transporte."""
         self.url_base = url_base.rstrip("/")
@@ -77,6 +78,9 @@ class ProviderEvolution:
         self.resolvedor = resolvedor or _resolver_enderecos
         self.timeout = timeout
         self.limite_resposta = limite_resposta
+        self.hosts_internos_permitidos = frozenset(
+            host.rstrip(".").lower() for host in (hosts_internos_permitidos or ())
+        )
 
     def __repr__(self) -> str:
         """Representa o provider sem revelar a credencial configurada."""
@@ -106,7 +110,8 @@ class ProviderEvolution:
             raise WhatsAppIndisponivel(
                 "A Evolution API resolveu para um endereco invalido."
             ) from erro
-        if any(not destino.is_global for destino in destinos):
+        host_interno = host.rstrip(".").lower() in self.hosts_internos_permitidos
+        if not host_interno and any(not destino.is_global for destino in destinos):
             raise WhatsAppIndisponivel("O destino da Evolution API nao e permitido.")
 
     def _requisitar(

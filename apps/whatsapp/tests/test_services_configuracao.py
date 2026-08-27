@@ -154,6 +154,70 @@ def test_configuracao_recusa_url_insegura_em_producao(settings, url_base: str) -
 
 
 @pytest.mark.django_db
+def test_configuracao_aceita_http_apenas_para_host_interno_permitido(settings) -> None:
+    """Libera o DNS privado gerenciado sem abrir HTTP para outros destinos."""
+    from apps.whatsapp.services.configurar_instancia import (
+        ConfiguracaoWhatsAppInvalida,
+        DadosConfiguracaoWhatsApp,
+        atualizar_configuracao,
+    )
+
+    settings.DEBUG = True
+    settings.IA_CHAVE_CRIPTOGRAFIA = "mestre-interna"
+    settings.WHATSAPP_HOSTS_INTERNOS_PERMITIDOS = frozenset({"evolution"})
+    empresa = Empresa.objects.create(nome="Empresa Evolution interna")
+    ator = _membro(
+        empresa,
+        MembroEmpresa.Papel.ADMINISTRADOR,
+        "evolution-interna@example.com",
+    )
+    interna = DadosConfiguracaoWhatsApp(
+        url_base="http://EVOLUTION.:8080/",
+        nome_instancia="empresa-interna",
+        chave_api="chave",
+    )
+    externa_http = DadosConfiguracaoWhatsApp(
+        url_base="http://evolution.example.com:8080",
+        nome_instancia="empresa-externa",
+        chave_api="chave",
+    )
+
+    resultado = atualizar_configuracao(
+        empresa=empresa,
+        ator=ator,
+        dados=interna,
+        correlacao="interna",
+    )
+    assert resultado.url_base == "http://EVOLUTION.:8080"
+    with pytest.raises(ConfiguracaoWhatsAppInvalida):
+        atualizar_configuracao(
+            empresa=empresa,
+            ator=ator,
+            dados=externa_http,
+            correlacao="externa-http",
+        )
+
+
+@pytest.mark.django_db
+def test_configuracao_vazia_publica_url_interna_padrao(settings) -> None:
+    """Preenche a tela inicial sem expor qualquer credencial."""
+    from apps.whatsapp.services.configurar_instancia import obter_configuracao
+
+    settings.EVOLUTION_INTERNAL_URL = "http://evolution:8080"
+    empresa = Empresa.objects.create(nome="Empresa sem configuracao")
+    ator = _membro(
+        empresa,
+        MembroEmpresa.Papel.ADMINISTRADOR,
+        "sem-configuracao@example.com",
+    )
+
+    resultado = obter_configuracao(empresa=empresa, ator=ator)
+
+    assert resultado.url_base == "http://evolution:8080"
+    assert resultado.chave_configurada is False
+
+
+@pytest.mark.django_db
 def test_conectar_e_desconectar_atualizam_estado_e_auditoria(settings) -> None:
     """Reflete as acoes remotas no estado local auditavel da empresa."""
     from apps.auditoria.models import EventoAuditoria

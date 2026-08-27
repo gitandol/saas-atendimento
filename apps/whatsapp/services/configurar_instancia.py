@@ -61,7 +61,7 @@ def _publicar(
     """Converte o model em representacao publica sem segredo."""
     if configuracao is None:
         return ConfiguracaoWhatsAppPublica(
-            url_base="",
+            url_base=settings.EVOLUTION_INTERNAL_URL,
             nome_instancia="",
             chave_configurada=False,
             ativo=False,
@@ -115,9 +115,13 @@ def _validar_url(url_base: str) -> str:
         and not 1 <= porta <= 65535
     ):
         raise ConfiguracaoWhatsAppInvalida("A URL da Evolution e invalida.")
-    esquemas = {"http", "https"} if settings.DEBUG else {"https"}
-    if partes.scheme.lower() not in esquemas:
-        raise ConfiguracaoWhatsAppInvalida("A URL da Evolution deve usar HTTPS.")
+    host_interno = _host_interno_permitido(hostname)
+    if partes.scheme.lower() != "https" and not (
+        partes.scheme.lower() == "http" and host_interno
+    ):
+        raise ConfiguracaoWhatsAppInvalida(
+            "A URL da Evolution deve usar HTTPS ou um host interno permitido."
+        )
 
     host = hostname.rstrip(".").lower()
     nomes_bloqueados = {
@@ -134,6 +138,12 @@ def _validar_url(url_base: str) -> str:
     if endereco is not None and not endereco.is_global:
         raise ConfiguracaoWhatsAppInvalida("O host da Evolution nao e permitido.")
     return valor
+
+
+def _host_interno_permitido(host: str) -> bool:
+    """Compara hostname normalizado com a allowlist gerenciada."""
+    normalizado = host.rstrip(".").lower()
+    return normalizado in settings.WHATSAPP_HOSTS_INTERNOS_PERMITIDOS
 
 
 def obter_configuracao(
@@ -181,7 +191,7 @@ def atualizar_configuracao(
         configuracao.chave_api_criptografada = criptografar_chave(
             dados.chave_api.strip()
         )
-    configuracao.full_clean()
+    configuracao.full_clean(exclude=["url_base"])
     configuracao.save()
     depois = _snapshot(configuracao)
     campos_alterados = [
@@ -222,6 +232,7 @@ def _obter_provider(empresa: Empresa) -> ProviderWhatsApp:
         url_base=configuracao.url_base,
         nome_instancia=configuracao.nome_instancia,
         chave_api=chave_api,
+        hosts_internos_permitidos=settings.WHATSAPP_HOSTS_INTERNOS_PERMITIDOS,
     )
 
 

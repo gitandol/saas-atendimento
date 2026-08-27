@@ -114,3 +114,13 @@ CELERY_TASK_TIME_LIMIT = 300
 DOCS_AUTENTICADA = True
 LOGIN_URL = "/admin/login/"
 IA_CHAVE_CRIPTOGRAFIA = os.getenv("IA_CHAVE_CRIPTOGRAFIA", "")
+EVOLUTION_INTERNAL_URL = os.getenv(
+    "EVOLUTION_INTERNAL_URL", "http://evolution:8080"
+).rstrip("/")
+WHATSAPP_HOSTS_INTERNOS_PERMITIDOS = frozenset(
+    host.strip().rstrip(".").lower()
+    for host in os.getenv(
+        "WHATSAPP_HOSTS_INTERNOS_PERMITIDOS", "evolution"
+    ).split(",")
+    if host.strip()
+)
