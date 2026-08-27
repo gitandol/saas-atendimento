@@ -218,6 +218,38 @@ def test_configuracao_vazia_publica_url_interna_padrao(settings) -> None:
 
 
 @pytest.mark.django_db
+def test_configuracao_recusa_url_acima_do_limite_do_modelo(settings) -> None:
+    """Preserva o limite do campo ao liberar o hostname Docker sem TLD."""
+    from apps.whatsapp.services.configurar_instancia import (
+        ConfiguracaoWhatsAppInvalida,
+        DadosConfiguracaoWhatsApp,
+        atualizar_configuracao,
+    )
+
+    settings.IA_CHAVE_CRIPTOGRAFIA = "mestre-limite-url"
+    settings.WHATSAPP_HOSTS_INTERNOS_PERMITIDOS = frozenset({"evolution"})
+    empresa = Empresa.objects.create(nome="Empresa URL longa")
+    ator = _membro(
+        empresa,
+        MembroEmpresa.Papel.ADMINISTRADOR,
+        "url-longa@example.com",
+    )
+    dados = DadosConfiguracaoWhatsApp(
+        url_base="http://evolution:8080/" + "a" * 500,
+        nome_instancia="instancia-longa",
+        chave_api="chave",
+    )
+
+    with pytest.raises(ConfiguracaoWhatsAppInvalida):
+        atualizar_configuracao(
+            empresa=empresa,
+            ator=ator,
+            dados=dados,
+            correlacao="url-longa",
+        )
+
+
+@pytest.mark.django_db
 def test_conectar_e_desconectar_atualizam_estado_e_auditoria(settings) -> None:
     """Reflete as acoes remotas no estado local auditavel da empresa."""
     from apps.auditoria.models import EventoAuditoria

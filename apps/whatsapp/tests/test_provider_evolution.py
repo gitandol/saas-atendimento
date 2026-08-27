@@ -244,6 +244,71 @@ def test_provider_aceita_dns_privado_somente_para_host_interno_permitido() -> No
     assert provider.consultar_estado() == EstadoConexao.CONECTADO
 
 
+def test_provider_recusa_http_para_host_externo_antes_da_chamada() -> None:
+    """Impede HTTP direto para host global fora da allowlist gerenciada."""
+    from apps.whatsapp.integrations.evolution import ProviderEvolution
+    from apps.whatsapp.integrations.protocolos import WhatsAppIndisponivel
+
+    cliente = ClienteHTTPFalso(
+        [
+            RespostaHTTPFalsa(
+                200,
+                {"instance": {"state": "open"}},
+                content=b'{"instance":{"state":"open"}}',
+            )
+        ]
+    )
+    resolucoes: list[tuple[str, int]] = []
+
+    def resolver(host: str, porta: int) -> set[str]:
+        resolucoes.append((host, porta))
+        return {"93.184.216.34"}
+
+    provider = ProviderEvolution(
+        url_base="http://evolution.example.com",
+        nome_instancia="empresa-1",
+        chave_api="chave",
+        cliente=cliente,
+        resolvedor=resolver,
+        hosts_internos_permitidos=frozenset({"evolution"}),
+    )
+
+    with pytest.raises(WhatsAppIndisponivel):
+        provider.consultar_estado()
+    assert cliente.chamadas == []
+    assert resolucoes == []
+
+
+@pytest.mark.parametrize(
+    ("url_base", "host_permitido"),
+    [
+        ("http://127.0.0.1:8080", "127.0.0.1"),
+        ("http://[::1]:8080", "::1"),
+        ("http://metadata.google.internal:8080", "metadata.google.internal"),
+    ],
+)
+def test_provider_recusa_destino_bloqueado_mesmo_na_allowlist(
+    url_base: str, host_permitido: str
+) -> None:
+    """Mantem metadata e IPs locais bloqueados apesar da allowlist fornecida."""
+    from apps.whatsapp.integrations.evolution import ProviderEvolution
+    from apps.whatsapp.integrations.protocolos import WhatsAppIndisponivel
+
+    cliente = ClienteHTTPFalso([])
+    provider = ProviderEvolution(
+        url_base=url_base,
+        nome_instancia="empresa-1",
+        chave_api="chave",
+        cliente=cliente,
+        resolvedor=lambda _host, _porta: {"127.0.0.1"},
+        hosts_internos_permitidos=frozenset({host_permitido}),
+    )
+
+    with pytest.raises(WhatsAppIndisponivel):
+        provider.consultar_estado()
+    assert cliente.chamadas == []
+
+
 def test_provider_desabilita_redirects_para_impedir_salto_ssrf() -> None:
     """Nao segue redirecionamento externo para um destino nao validado."""
     from apps.whatsapp.integrations.protocolos import WhatsAppIndisponivel

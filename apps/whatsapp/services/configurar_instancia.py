@@ -7,7 +7,7 @@ from typing import Any
 from urllib.parse import urlsplit
 
 from django.conf import settings
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 
 from apps.auditoria.models import EventoAuditoria
@@ -99,6 +99,9 @@ def _exigir_administrador(*, empresa: Empresa, ator: Usuario) -> None:
 def _validar_url(url_base: str) -> str:
     """Normaliza HTTPS e bloqueia alvos locais, privados e de metadata."""
     valor = url_base.strip().rstrip("/")
+    limite_url = ConfiguracaoWhatsApp._meta.get_field("url_base").max_length
+    if len(valor) > limite_url:
+        raise ConfiguracaoWhatsAppInvalida("A URL da Evolution e invalida.")
     try:
         partes = urlsplit(valor)
         hostname = partes.hostname
@@ -191,7 +194,17 @@ def atualizar_configuracao(
         configuracao.chave_api_criptografada = criptografar_chave(
             dados.chave_api.strip()
         )
-    configuracao.full_clean(exclude=["url_base"])
+    try:
+        configuracao.full_clean()
+    except ValidationError as erro:
+        hostname = urlsplit(url_base).hostname
+        if (
+            not hostname
+            or not _host_interno_permitido(hostname)
+            or set(erro.message_dict) != {"url_base"}
+        ):
+            raise
+        configuracao.full_clean(exclude=["url_base"])
     configuracao.save()
     depois = _snapshot(configuracao)
     campos_alterados = [

@@ -96,11 +96,35 @@ class ProviderEvolution:
 
     def _validar_destino_resolvido(self) -> None:
         """Recusa qualquer endereco DNS que nao seja global antes da chamada."""
-        partes = urlsplit(self.url_base)
-        host = partes.hostname
+        try:
+            partes = urlsplit(self.url_base)
+            host = partes.hostname
+            porta = partes.port
+        except ValueError as erro:
+            raise WhatsAppIndisponivel("A URL da Evolution e invalida.") from erro
         if not host:
             raise WhatsAppIndisponivel("A URL da Evolution e invalida.")
-        porta = partes.port or (443 if partes.scheme == "https" else 80)
+        host_normalizado = host.rstrip(".").lower()
+        nomes_bloqueados = {
+            "localhost",
+            "metadata.google.internal",
+            "metadata.google.com",
+        }
+        if host_normalizado in nomes_bloqueados or host_normalizado.endswith(
+            ".localhost"
+        ):
+            raise WhatsAppIndisponivel("O destino da Evolution API nao e permitido.")
+        try:
+            endereco = ipaddress.ip_address(host_normalizado)
+        except ValueError:
+            endereco = None
+        if endereco is not None and not endereco.is_global:
+            raise WhatsAppIndisponivel("O destino da Evolution API nao e permitido.")
+        esquema = partes.scheme.lower()
+        host_interno = host_normalizado in self.hosts_internos_permitidos
+        if esquema != "https" and not (esquema == "http" and host_interno):
+            raise WhatsAppIndisponivel("O destino da Evolution API nao e permitido.")
+        porta = porta or (443 if esquema == "https" else 80)
         enderecos = self.resolvedor(host, porta)
         if not enderecos:
             raise WhatsAppIndisponivel("A Evolution API nao possui endereco valido.")
@@ -110,7 +134,6 @@ class ProviderEvolution:
             raise WhatsAppIndisponivel(
                 "A Evolution API resolveu para um endereco invalido."
             ) from erro
-        host_interno = host.rstrip(".").lower() in self.hosts_internos_permitidos
         if not host_interno and any(not destino.is_global for destino in destinos):
             raise WhatsAppIndisponivel("O destino da Evolution API nao e permitido.")
 
