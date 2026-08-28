@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Caixa de entrada | Atendimento{% endblock %}
+
+{% block conteudo %}
+  <section class="cabecalho-pagina cabecalho-caixa">
+    <div>
+      <p class="rotulo-pagina">Atendimento</p>
+      <h1>Caixa de entrada</h1>
+      <p>Acompanhe conversas da IA e responda quando houver intervencao humana.</p>
+    </div>
+    {% include "componentes/link_ajuda.html" with topico_ajuda="caixa-de-entrada" %}
+  </section>
+
+  <p id="erro-caixa" class="alerta erro-caixa" role="alert" hidden>
+    Nao foi possivel atualizar a caixa de entrada. Tente novamente.
+  </p>
+
+  <section class="caixa-entrada" aria-label="Caixa de entrada">
+    <aside class="painel-caixa painel-lista" data-painel="lista" data-painel-ativo>
+      <form
+        class="filtros-conversas"
+        hx-get="/api/v1/atendimento/conversas"
+        hx-target="#lista-conversas"
+        hx-trigger="input changed delay:350ms, change"
+      >
+        <label for="busca-conversa">Buscar</label>
+        <input id="busca-conversa" name="busca" type="search" placeholder="Nome ou numero">
+        <label for="filtro-conversa">Filtro</label>
+        <select id="filtro-conversa" name="filtro">
+          <option value="ABERTAS">Abertas</option>
+          <option value="IA">IA</option>
+          <option value="HUMANO">Humano</option>
+          <option value="FINALIZADAS">Finalizadas</option>
+        </select>
+      </form>
+      <div
+        id="lista-conversas"
+        class="lista-conversas"
+        hx-get="/api/v1/atendimento/conversas"
+        hx-trigger="load"
+        aria-live="polite"
+      >
+        <p class="estado-caixa" role="status">Carregando conversas...</p>
+      </div>
+    </aside>
+
+    <section class="painel-caixa painel-historico" data-painel="conversa">
+      <header class="cabecalho-conversa">
+        <button class="botao-secundario voltar-caixa" type="button" data-mostrar-painel="lista">
+          Voltar
+        </button>
+        <div>
+          <h2 id="nome-conversa">Selecione uma conversa</h2>
+          <p id="numero-conversa">O historico aparecera aqui.</p>
+        </div>
+        <button class="botao-secundario detalhes-movel" type="button" data-mostrar-painel="detalhes">
+          Detalhes
+        </button>
+      </header>
+      <div
+        id="historico-conversa"
+        class="historico-conversa"
+        hx-trigger="load, every 3s"
+        hx-swap="beforeend"
+        aria-live="polite"
+      >
+        <p class="estado-caixa" role="status">Nenhuma conversa selecionada.</p>
+      </div>
+      <form
+        id="formulario-resposta-manual"
+        class="formulario-resposta"
+        hx-post=""
+        hx-ext="json-enc"
+        hx-swap="none"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+      >
+        <label class="somente-leitor" for="texto-resposta">Resposta manual</label>
+        <textarea
+          id="texto-resposta"
+          name="texto"
+          maxlength="4096"
+          rows="2"
+          placeholder="Escreva uma resposta"
+          disabled
+          required
+        ></textarea>
+        <button type="submit" disabled>Enviar</button>
+        <p id="feedback-resposta" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <aside id="detalhes-conversa" class="painel-caixa painel-detalhes" data-painel="detalhes">
+      <button class="botao-secundario voltar-caixa" type="button" data-mostrar-painel="conversa">
+        Voltar a conversa
+      </button>
+      <h2>Detalhes</h2>
+      <dl>
+        <dt>Modo</dt><dd id="modo-conversa">—</dd>
+        <dt>Estado</dt><dd id="estado-conversa">—</dd>
+        <dt>Atendente</dt><dd id="atendente-conversa">—</dd>
+      </dl>
+    </aside>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'vendor/htmx.min.js' %}"></script>
+  <script src="{% static 'vendor/htmx-ext-json-enc.js' %}"></script>
+  <script src="{% static 'src/js/caixa_entrada.js' %}" defer></script>
+{% endblock %}

@@ -13,6 +13,7 @@ from apps.atendimento.tests.factories import (
     ConversaFactory,
     EmpresaFactory,
     MensagemFactory,
+    UsuarioFactory,
 )
 
 
@@ -67,6 +68,85 @@ def test_listar_conversas_ordena_estavelmente_por_data_e_uuid() -> None:
 
 
 @pytest.mark.django_db
+def test_listar_conversas_busca_filtra_e_publica_resumo_operacional() -> None:
+    """Falha se a caixa ignorar busca, filtro ou dados visiveis da conversa."""
+    from apps.atendimento.services.consultas.listar_conversas import listar_conversas
+
+    empresa = EmpresaFactory()
+    atendente = UsuarioFactory(first_name="Bia", last_name="Lima")
+    conversa = ConversaFactory(
+        empresa=empresa,
+        contato=ContatoFactory(
+            empresa=empresa,
+            nome="Ana Souza",
+            numero_normalizado="5568999990000",
+        ),
+        modo=Conversa.Modo.HUMANO,
+        atendente=atendente,
+        contagem_nao_lida=3,
+    )
+    ultima = MensagemFactory(
+        empresa=empresa,
+        conversa=conversa,
+        texto="Preciso de ajuda com meu pedido",
+    )
+    Conversa.objects.filter(pk=conversa.id).update(ultima_mensagem=ultima)
+    ConversaFactory(
+        empresa=empresa,
+        contato=ContatoFactory(empresa=empresa, nome="Outro contato"),
+        modo=Conversa.Modo.IA,
+    )
+
+    resultado = listar_conversas(
+        empresa=empresa,
+        busca="(68) 99999-0000",
+        filtro="HUMANO",
+    )
+
+    assert [item.id for item in resultado] == [conversa.id]
+    assert resultado[0].ultima_mensagem_texto == "Preciso de ajuda com meu pedido"
+    assert resultado[0].atendente_nome == "Bia Lima"
+    assert resultado[0].contagem_nao_lida == 3
+
+
+@pytest.mark.django_db
+def test_listar_conversas_aplica_filtros_operacionais() -> None:
+    """Falha se um filtro misturar abertas, modos ou finalizadas."""
+    from apps.atendimento.services.consultas.listar_conversas import listar_conversas
+
+    empresa = EmpresaFactory()
+    aberta_ia = ConversaFactory(
+        empresa=empresa,
+        contato=ContatoFactory(empresa=empresa),
+        modo=Conversa.Modo.IA,
+    )
+    aberta_humana = ConversaFactory(
+        empresa=empresa,
+        contato=ContatoFactory(empresa=empresa),
+        modo=Conversa.Modo.HUMANO,
+    )
+    finalizada = ConversaFactory(
+        empresa=empresa,
+        contato=ContatoFactory(empresa=empresa),
+        estado=Conversa.Estado.FINALIZADA,
+    )
+
+    assert {item.id for item in listar_conversas(empresa=empresa)} == {
+        aberta_ia.id,
+        aberta_humana.id,
+    }
+    assert [item.id for item in listar_conversas(empresa=empresa, filtro="IA")] == [
+        aberta_ia.id
+    ]
+    assert [item.id for item in listar_conversas(empresa=empresa, filtro="HUMANO")] == [
+        aberta_humana.id
+    ]
+    assert [
+        item.id for item in listar_conversas(empresa=empresa, filtro="FINALIZADAS")
+    ] == [finalizada.id]
+
+
+@pytest.mark.django_db
 def test_obter_historico_preserva_mensagens_e_ordena_por_data_e_uuid() -> None:
     """Retorna historico finalizado em ordem cronologica deterministica."""
     from apps.atendimento.dto import MensagemDTO
@@ -101,3 +181,42 @@ def test_obter_historico_recusa_conversa_de_outra_empresa() -> None:
     conversa = ConversaFactory()
     with pytest.raises(ObjectDoesNotExist):
         obter_historico(empresa=EmpresaFactory(), conversa_id=conversa.id)
+
+
+@pytest.mark.django_db
+def test_obter_historico_pagina_por_cursor_sem_duplicar_mensagens() -> None:
+    """Falha se paginas adjacentes repetirem ou pularem mensagens."""
+    from apps.atendimento.services.consultas.obter_historico import obter_historico
+
+    conversa = ConversaFactory()
+    mensagens = [
+        MensagemFactory(conversa=conversa, empresa=conversa.empresa) for _ in range(4)
+    ]
+    instante = timezone.now()
+    for indice, mensagem in enumerate(mensagens):
+        Mensagem.objects.filter(pk=mensagem.id).update(
+            criado_em=instante + timezone.timedelta(seconds=indice)
+        )
+
+    recentes = obter_historico(
+        empresa=conversa.empresa,
+        conversa_id=conversa.id,
+        limite=2,
+    )
+    antigas = obter_historico(
+        empresa=conversa.empresa,
+        conversa_id=conversa.id,
+        cursor=recentes[0].id,
+        limite=2,
+    )
+    novas = obter_historico(
+        empresa=conversa.empresa,
+        conversa_id=conversa.id,
+        depois_de=recentes[-1].id,
+        limite=2,
+    )
+
+    assert [item.id for item in recentes] == [mensagens[2].id, mensagens[3].id]
+    assert [item.id for item in antigas] == [mensagens[0].id, mensagens[1].id]
+    assert novas == []
+    assert not ({item.id for item in recentes} & {item.id for item in antigas})

@@ -46,6 +46,8 @@ name = "Camadas HTTP nao importam models"
 type = "forbidden"
 allow_indirect_imports = true
 source_modules = [
+    "apps.atendimento.api",
+    "apps.atendimento.views",
     "apps.ajuda.api",
     "apps.ajuda.views",
     "apps.auditoria.api",
@@ -62,6 +64,7 @@ source_modules = [
     "apps.whatsapp.views",
 ]
 forbidden_modules = [
+    "apps.atendimento.models",
     "apps.auditoria.models",
     "apps.contas.models",
     "apps.empresas.models",
@@ -74,6 +77,7 @@ forbidden_modules = [
 name = "Services nao importam fronteiras HTTP"
 type = "forbidden"
 source_modules = [
+    "apps.atendimento.services",
     "apps.ajuda.services",
     "apps.auditoria.services",
     "apps.contas.services",
@@ -83,6 +87,8 @@ source_modules = [
     "apps.whatsapp.services",
 ]
 forbidden_modules = [
+    "apps.atendimento.api",
+    "apps.atendimento.views",
     "apps.ajuda.api",
     "apps.ajuda.views",
     "apps.auditoria.api",

@@ -13,6 +13,7 @@ from apps.auditoria.models import EventoAuditoria
 from apps.auditoria.services.registrar_alteracao import registrar_alteracao
 from apps.contas.models import Usuario
 from apps.empresas.models import Empresa
+from apps.empresas.services.obter_empresa import autorizar_membro
 
 
 def conversa_para_dto(conversa: Conversa) -> ConversaDTO:
@@ -28,7 +29,47 @@ def conversa_para_dto(conversa: Conversa) -> ConversaDTO:
         finalizada_em=conversa.finalizada_em,
         criado_em=conversa.criado_em,
         atualizado_em=conversa.atualizado_em,
+        ultima_mensagem_texto=(
+            conversa.ultima_mensagem.texto if conversa.ultima_mensagem_id else ""
+        ),
+        atendente_nome=(
+            conversa.atendente.get_full_name() or conversa.atendente.email
+            if conversa.atendente_id
+            else ""
+        ),
     )
+
+
+@transaction.atomic
+def marcar_como_lida(
+    *,
+    empresa: Empresa,
+    conversa_id: UUID,
+    ator: Usuario,
+    correlacao: str,
+) -> ConversaDTO:
+    """Zera nao lidas de uma conversa autorizada e registra a alteracao."""
+    autorizar_membro(empresa=empresa, ator=ator)
+    conversa = (
+        Conversa.objects.select_for_update()
+        .select_related("contato", "atendente", "ultima_mensagem")
+        .get(pk=conversa_id, empresa=empresa)
+    )
+    if conversa.contagem_nao_lida == 0:
+        return conversa_para_dto(conversa)
+    antes = snapshot_conversa(conversa)
+    conversa.contagem_nao_lida = 0
+    conversa.save(update_fields=("contagem_nao_lida", "atualizado_em"))
+    _auditar_conversa(
+        empresa=empresa,
+        conversa=conversa,
+        acao=EventoAuditoria.Acao.ATUALIZACAO,
+        antes=antes,
+        ator=ator,
+        origem="api_caixa_entrada",
+        correlacao=correlacao,
+    )
+    return conversa_para_dto(conversa)
 
 
 def snapshot_conversa(conversa: Conversa) -> dict[str, Any]:

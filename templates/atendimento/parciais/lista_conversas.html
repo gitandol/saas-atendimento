@@ -1,0 +1,32 @@
+{% if conversas %}
+  {% for conversa in conversas %}
+    <button
+      class="item-conversa"
+      type="button"
+      data-abrir-conversa
+      data-conversa-id="{{ conversa.id }}"
+      data-nome="{{ conversa.contato.nome|default:conversa.contato.numero_normalizado }}"
+      data-numero="{{ conversa.contato.numero_normalizado }}"
+      data-modo="{{ conversa.modo }}"
+      data-estado="{{ conversa.estado }}"
+      data-atendente="{{ conversa.atendente_nome }}"
+      hx-get="/api/v1/atendimento/conversas/{{ conversa.id }}/mensagens"
+      hx-target="#historico-conversa"
+      hx-swap="innerHTML"
+    >
+      <span class="identidade-conversa">
+        <strong>{{ conversa.contato.nome|default:conversa.contato.numero_normalizado }}</strong>
+        <span>{{ conversa.contato.numero_normalizado }}</span>
+      </span>
+      {% if conversa.contagem_nao_lida %}
+        <span class="contador-nao-lidas" aria-label="{{ conversa.contagem_nao_lida }} mensagens nao lidas">
+          {{ conversa.contagem_nao_lida }}
+        </span>
+      {% endif %}
+      <span class="previa-conversa">{{ conversa.ultima_mensagem_texto|default:"Sem mensagens" }}</span>
+      <span class="metadados-conversa">{{ conversa.modo }} · {{ conversa.estado }}</span>
+    </button>
+  {% endfor %}
+{% else %}
+  <p class="estado-caixa" role="status">Nenhuma conversa encontrada.</p>
+{% endif %}

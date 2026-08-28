@@ -1,0 +1,40 @@
+{% if proximo_cursor %}
+  <button
+    class="botao-secundario carregar-anteriores"
+    type="button"
+    hx-get="/api/v1/atendimento/conversas/{{ conversa_id }}/mensagens?cursor={{ proximo_cursor }}"
+    hx-target="#historico-conversa"
+    hx-swap="afterbegin"
+  >
+    Carregar mensagens anteriores
+  </button>
+{% endif %}
+{% for mensagem in mensagens %}
+  <article
+    id="mensagem-{{ mensagem.id }}"
+    class="bolha-mensagem bolha-{{ mensagem.autor|lower }}"
+    data-mensagem-id="{{ mensagem.id }}"
+    tabindex="0"
+  >
+    <p>{{ mensagem.texto }}</p>
+    <footer>
+      <time datetime="{{ mensagem.criado_em|date:'c' }}">{{ mensagem.criado_em|date:"d/m H:i" }}</time>
+      <span>{{ mensagem.status }}</span>
+      {% if mensagem.erro_sanitizado %}<span class="erro-mensagem">{{ mensagem.erro_sanitizado }}</span>{% endif %}
+      {% if mensagem.status == "FALHA" and mensagem.direcao == "SAIDA" %}
+        <button
+          type="button"
+          hx-post="/api/v1/whatsapp/mensagens/{{ mensagem.id }}/reenviar"
+          hx-swap="none"
+          hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+          hx-confirm="Deseja reenviar esta mensagem?"
+        >
+          Reenviar
+        </button>
+      {% endif %}
+    </footer>
+  </article>
+{% empty %}{% if not incremental %}
+  <p class="estado-caixa" role="status">Ainda nao ha mensagens nesta conversa.</p>
+{% endif %}
+{% endfor %}

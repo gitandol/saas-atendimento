@@ -10,6 +10,7 @@ from ninja import NinjaAPI, Schema
 from ninja.errors import AuthenticationError, ValidationError
 
 from apps.ajuda.api.router import router as ajuda_router
+from apps.atendimento.api.router import router as atendimento_router
 from apps.auditoria.api.router import router as auditoria_router
 from apps.contas.api.router import router as contas_router
 from apps.empresas.api.router import router as empresas_router
@@ -38,6 +39,7 @@ api.add_router("", nucleo_router)
 api.add_router("", empresas_router)
 api.add_router("", ia_router)
 api.add_router("", whatsapp_router)
+api.add_router("", atendimento_router)
 api.add_router("/auditoria", auditoria_router)
 api.add_router("/ajuda", ajuda_router)
 

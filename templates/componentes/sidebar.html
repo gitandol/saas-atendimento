@@ -37,6 +37,10 @@
       <span aria-hidden="true">&#9742;</span>
       <span class="sidebar-rotulo">WhatsApp</span>
     </a>
+    <a class="item-navegacao{% if "/atendimento/" in request.path %} item-navegacao-ativo{% endif %}" href="/atendimento/caixa-de-entrada/"{% if "/atendimento/" in request.path %} aria-current="page"{% endif %}>
+      <span aria-hidden="true">&#9993;</span>
+      <span class="sidebar-rotulo">Caixa de entrada</span>
+    </a>
     <a class="item-navegacao{% if "/auditoria/" in request.path %} item-navegacao-ativo{% endif %}" href="/auditoria/historico/"{% if "/auditoria/" in request.path %} aria-current="page"{% endif %}>
       <span aria-hidden="true">&#9716;</span>
       <span class="sidebar-rotulo">Auditoria</span>

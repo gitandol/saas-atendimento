@@ -21,3 +21,5 @@ class ConversaDTO:
     finalizada_em: datetime | None
     criado_em: datetime
     atualizado_em: datetime
+    ultima_mensagem_texto: str = ""
+    atendente_nome: str = ""
