@@ -15,11 +15,9 @@ from apps.atendimento.services.contatos import obter_ou_criar_contato
 from apps.atendimento.services.conversas import obter_ou_abrir_conversa
 from apps.atendimento.services.mensagens import registrar_mensagem
 from apps.empresas.models import Empresa
+from apps.ia.tasks.responder_conversa import responder_conversa
 from apps.whatsapp.services.normalizar_evento import normalizar_evento
 from apps.whatsapp.services.validar_webhook import validar_webhook
-from apps.whatsapp.tasks.processar_mensagem_recebida import (
-    processar_mensagem_recebida,
-)
 
 logger = logging.getLogger(__name__)
 DURACAO_LEASE_PUBLICACAO = timedelta(minutes=2)
@@ -139,7 +137,11 @@ def _enfileirar(mensagem: Mensagem, correlacao: str) -> bool:
             return False
         raise EnfileiramentoIndisponivel
     try:
-        processar_mensagem_recebida.delay(str(mensagem.pk), correlacao)
+        responder_conversa.delay(
+            str(mensagem.conversa_id),
+            str(mensagem.pk),
+            correlacao,
+        )
     except Exception as erro:
         Mensagem.objects.filter(
             pk=mensagem.pk,

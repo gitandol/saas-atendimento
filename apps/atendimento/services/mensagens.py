@@ -117,6 +117,7 @@ def registrar_mensagem(
     texto: str,
     identificador_externo: str,
     status: str,
+    erro_sanitizado: str = "",
     ator: Usuario | None,
     origem: str,
     correlacao: str,
@@ -151,6 +152,7 @@ def registrar_mensagem(
         texto=texto,
         identificador_externo=identificador_externo,
         status=status,
+        erro_sanitizado=erro_sanitizado,
     )
     mensagem.full_clean()
     mensagem.save()

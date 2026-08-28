@@ -73,7 +73,7 @@ def test_persiste_entrada_uma_vez_e_enfileira_uma_vez() -> None:
 
     configuracao = _configuracao()
     with patch(
-        "apps.whatsapp.services.receber_webhook.processar_mensagem_recebida.delay"
+        "apps.whatsapp.services.receber_webhook.responder_conversa.delay"
     ) as delay:
         primeiro = receber_webhook(
             empresa_id=EMPRESA_ID,
@@ -94,7 +94,11 @@ def test_persiste_entrada_uma_vez_e_enfileira_uma_vez() -> None:
     assert Contato.objects.filter(empresa=configuracao.empresa).count() == 1
     assert Conversa.objects.filter(empresa=configuracao.empresa).count() == 1
     assert Mensagem.objects.filter(empresa=configuracao.empresa).count() == 1
-    delay.assert_called_once_with(str(primeiro.mensagem_id), "corr-entrada")
+    delay.assert_called_once_with(
+        str(Mensagem.objects.get(pk=primeiro.mensagem_id).conversa_id),
+        str(primeiro.mensagem_id),
+        "corr-entrada",
+    )
 
 
 @pytest.mark.django_db
@@ -104,7 +108,7 @@ def test_saida_da_instancia_e_persistida_sem_enfileirar_resposta() -> None:
 
     configuracao = _configuracao()
     with patch(
-        "apps.whatsapp.services.receber_webhook.processar_mensagem_recebida.delay"
+        "apps.whatsapp.services.receber_webhook.responder_conversa.delay"
     ) as delay:
         resultado = receber_webhook(
             empresa_id=EMPRESA_ID,
@@ -132,7 +136,7 @@ def test_falha_do_broker_preserva_mensagem_e_retry_enfileira_uma_vez() -> None:
     configuracao = _configuracao()
     with (
         patch(
-            "apps.whatsapp.services.receber_webhook.processar_mensagem_recebida.delay",
+            "apps.whatsapp.services.receber_webhook.responder_conversa.delay",
             side_effect=RuntimeError("broker indisponivel"),
         ),
         pytest.raises(EnfileiramentoIndisponivel),
@@ -153,7 +157,7 @@ def test_falha_do_broker_preserva_mensagem_e_retry_enfileira_uma_vez() -> None:
     )
 
     with patch(
-        "apps.whatsapp.services.receber_webhook.processar_mensagem_recebida.delay"
+        "apps.whatsapp.services.receber_webhook.responder_conversa.delay"
     ) as delay:
         resultado = receber_webhook(
             empresa_id=EMPRESA_ID,
@@ -169,7 +173,11 @@ def test_falha_do_broker_preserva_mensagem_e_retry_enfileira_uma_vez() -> None:
         )
 
     assert resultado.criado is False
-    delay.assert_called_once_with(str(resultado.mensagem_id), "corr-retry")
+    delay.assert_called_once_with(
+        str(Mensagem.objects.get(pk=resultado.mensagem_id).conversa_id),
+        str(resultado.mensagem_id),
+        "corr-retry",
+    )
 
 
 @pytest.mark.django_db
@@ -183,14 +191,16 @@ def test_leituras_concorrentes_reivindicam_uma_unica_publicacao() -> None:
     segunda_leitura = Mensagem.objects.get(pk=criada.pk)
 
     with patch(
-        "apps.whatsapp.services.receber_webhook.processar_mensagem_recebida.delay"
+        "apps.whatsapp.services.receber_webhook.responder_conversa.delay"
     ) as delay:
         primeiro = _enfileirar(primeira_leitura, "corr-concorrente-1")
         segundo = _enfileirar(segunda_leitura, "corr-concorrente-2")
 
     assert primeiro is True
     assert segundo is False
-    delay.assert_called_once_with(str(criada.pk), "corr-concorrente-1")
+    delay.assert_called_once_with(
+        str(criada.conversa_id), str(criada.pk), "corr-concorrente-1"
+    )
 
 
 @pytest.mark.django_db
@@ -204,9 +214,11 @@ def test_reivindicacao_abandonada_pode_ser_publicada_novamente() -> None:
     )
 
     with patch(
-        "apps.whatsapp.services.receber_webhook.processar_mensagem_recebida.delay"
+        "apps.whatsapp.services.receber_webhook.responder_conversa.delay"
     ) as delay:
         enfileirado = _enfileirar(mensagem, "corr-lease-expirado")
 
     assert enfileirado is True
-    delay.assert_called_once_with(str(mensagem.pk), "corr-lease-expirado")
+    delay.assert_called_once_with(
+        str(mensagem.conversa_id), str(mensagem.pk), "corr-lease-expirado"
+    )

@@ -114,9 +114,7 @@ def test_endpoint_aceita_evento_desconhecido_e_midia_sem_criar_mensagem(
 def test_endpoint_persiste_e_reconhece_repeticao_com_correlacao() -> None:
     """Publica contrato 200 idempotente e a correlacao sem expor conteudo."""
     _configuracao()
-    with patch(
-        "apps.whatsapp.services.receber_webhook.processar_mensagem_recebida.delay"
-    ):
+    with patch("apps.whatsapp.services.receber_webhook.responder_conversa.delay"):
         primeira = Client().post(
             ROTA,
             data=_payload(),
