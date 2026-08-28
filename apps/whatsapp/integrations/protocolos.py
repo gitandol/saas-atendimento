@@ -25,6 +25,10 @@ class LimiteWhatsAppExcedido(Exception):
     """Indica que o limite externo de requisicoes foi atingido."""
 
 
+class RequisicaoWhatsAppInvalida(Exception):
+    """Indica erro permanente de requisicao que nao deve ser repetido."""
+
+
 class WhatsAppIndisponivel(Exception):
     """Indica indisponibilidade ou resposta invalida do fornecedor."""
 

@@ -21,6 +21,15 @@ class EventoMensagemRecebida:
     ocorrido_em: datetime
 
 
+@dataclass(frozen=True, slots=True)
+class EventoStatusEntrega:
+    """Representa um recibo externo sem transportar conteudo da mensagem."""
+
+    identificador_externo: str
+    status: str
+    ocorrido_em: datetime | None
+
+
 def _dicionario(valor: Any) -> dict[str, Any]:
     """Retorna um dicionario ou uma estrutura vazia segura."""
     return valor if isinstance(valor, dict) else {}
@@ -87,4 +96,47 @@ def normalizar_evento(
         texto=texto,
         enviado_pela_instancia=chave.get("fromMe") is True,
         ocorrido_em=_instante(dados.get("messageTimestamp")),
+    )
+
+
+def normalizar_evento_entrega(
+    payload: dict[str, Any],
+) -> EventoStatusEntrega | None:
+    """Normaliza somente atualizacoes conhecidas de envio, entrega ou falha."""
+    tipo_evento = payload.get("event")
+    if (
+        not isinstance(tipo_evento, str)
+        or tipo_evento.lower().replace("_", ".") != "messages.update"
+    ):
+        return None
+    dados_brutos = payload.get("data")
+    if isinstance(dados_brutos, list):
+        dados = _dicionario(dados_brutos[0]) if dados_brutos else {}
+    else:
+        dados = _dicionario(dados_brutos)
+    chave = _dicionario(dados.get("key"))
+    identificador = chave.get("id")
+    if not isinstance(identificador, str) or not identificador.strip():
+        raise EventoEvolutionInvalido("Identificador do recibo ausente.")
+    status_externo = dados.get("status")
+    mapa_status = {
+        "PENDING": "PENDENTE",
+        "SERVER_ACK": "ENVIADA",
+        "SENT": "ENVIADA",
+        "DELIVERY_ACK": "ENTREGUE",
+        "DELIVERED": "ENTREGUE",
+        "READ": "ENTREGUE",
+        "READ_ACK": "ENTREGUE",
+        "ERROR": "FALHA",
+        "FAILED": "FALHA",
+    }
+    status = mapa_status.get(str(status_externo).upper())
+    if status is None:
+        return None
+    timestamp = dados.get("messageTimestamp") or dados.get("timestamp")
+    ocorrido_em = _instante(timestamp) if timestamp is not None else None
+    return EventoStatusEntrega(
+        identificador_externo=identificador.strip(),
+        status=status,
+        ocorrido_em=ocorrido_em,
     )

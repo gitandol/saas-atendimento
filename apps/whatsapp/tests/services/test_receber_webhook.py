@@ -222,3 +222,50 @@ def test_reivindicacao_abandonada_pode_ser_publicada_novamente() -> None:
     delay.assert_called_once_with(
         str(mensagem.conversa_id), str(mensagem.pk), "corr-lease-expirado"
     )
+
+
+@pytest.mark.django_db
+def test_recibo_de_entrega_atualiza_saida_uma_vez_sem_criar_mensagem() -> None:
+    """Falha se webhook repetido duplicar mensagem ou historico de entrega."""
+    from apps.atendimento.tests.factories import MensagemFactory
+    from apps.auditoria.models import EventoAuditoria
+    from apps.whatsapp.services.receber_webhook import receber_webhook
+
+    configuracao = _configuracao()
+    mensagem = MensagemFactory(
+        empresa=configuracao.empresa,
+        conversa__empresa=configuracao.empresa,
+        conversa__contato__empresa=configuracao.empresa,
+        direcao=Mensagem.Direcao.SAIDA,
+        status=Mensagem.Status.ENVIADA,
+        identificador_externo="wamid-webhook-entrega",
+    )
+    payload = {
+        "event": "messages.update",
+        "data": {
+            "key": {"id": "wamid-webhook-entrega"},
+            "status": "DELIVERY_ACK",
+            "messageTimestamp": 1_725_192_000,
+        },
+    }
+
+    primeiro = receber_webhook(
+        empresa_id=EMPRESA_ID,
+        token=TOKEN_VALIDO,
+        payload=payload,
+        correlacao="corr-recibo",
+    )
+    eventos = EventoAuditoria.objects.filter(objeto_id=str(mensagem.id)).count()
+    repetido = receber_webhook(
+        empresa_id=EMPRESA_ID,
+        token=TOKEN_VALIDO,
+        payload=payload,
+        correlacao="corr-recibo-repetido",
+    )
+
+    mensagem.refresh_from_db()
+    assert primeiro.mensagem_id == mensagem.id
+    assert repetido.mensagem_id == mensagem.id
+    assert mensagem.status == Mensagem.Status.ENTREGUE
+    assert Mensagem.objects.filter(empresa=configuracao.empresa).count() == 1
+    assert EventoAuditoria.objects.filter(objeto_id=str(mensagem.id)).count() == eventos

@@ -16,7 +16,11 @@ from apps.atendimento.services.conversas import obter_ou_abrir_conversa
 from apps.atendimento.services.mensagens import registrar_mensagem
 from apps.empresas.models import Empresa
 from apps.ia.tasks.responder_conversa import responder_conversa
-from apps.whatsapp.services.normalizar_evento import normalizar_evento
+from apps.whatsapp.services.atualizar_status_entrega import atualizar_status_entrega
+from apps.whatsapp.services.normalizar_evento import (
+    normalizar_evento,
+    normalizar_evento_entrega,
+)
 from apps.whatsapp.services.validar_webhook import validar_webhook
 
 logger = logging.getLogger(__name__)
@@ -43,6 +47,21 @@ def _registrar_evento(
     correlacao: str,
 ) -> tuple[Mensagem | None, bool]:
     """Cria o agregado uma vez sob bloqueio do tenant."""
+    recibo = normalizar_evento_entrega(payload)
+    if recibo is not None:
+        atualizar_status_entrega(
+            empresa=empresa,
+            identificador_externo=recibo.identificador_externo,
+            status=recibo.status,
+            ocorrido_em=recibo.ocorrido_em,
+            correlacao=correlacao,
+        )
+        mensagem = Mensagem.objects.filter(
+            empresa=empresa,
+            identificador_externo=recibo.identificador_externo,
+            direcao=Mensagem.Direcao.SAIDA,
+        ).first()
+        return mensagem, False
     evento = normalizar_evento(payload)
     if evento is None:
         logger.info(

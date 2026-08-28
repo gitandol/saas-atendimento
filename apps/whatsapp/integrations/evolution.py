@@ -14,6 +14,7 @@ from apps.whatsapp.integrations.protocolos import (
     EstadoConexao,
     InstanciaWhatsAppNaoEncontrada,
     LimiteWhatsAppExcedido,
+    RequisicaoWhatsAppInvalida,
     WhatsAppIndisponivel,
 )
 
@@ -199,6 +200,10 @@ class ProviderEvolution:
                 raise InstanciaWhatsAppNaoEncontrada("A instancia nao foi encontrada.")
             if resposta.status_code == 429:
                 raise LimiteWhatsAppExcedido("O limite da Evolution API foi atingido.")
+            if 400 <= resposta.status_code < 500:
+                raise RequisicaoWhatsAppInvalida(
+                    "A Evolution recusou os dados da requisicao."
+                )
             if resposta.status_code < 200 or resposta.status_code >= 300:
                 raise WhatsAppIndisponivel("A Evolution API esta indisponivel.")
             try:

@@ -381,3 +381,13 @@ def test_provider_envia_texto_com_chave_de_idempotencia() -> None:
         "apikey": "chave-evolution",
         "Idempotency-Key": "evento-1",
     }
+
+
+def test_provider_classifica_400_como_falha_permanente() -> None:
+    """Falha se erro de requisicao do cliente entrar na politica de retry."""
+    from apps.whatsapp.integrations.protocolos import RequisicaoWhatsAppInvalida
+
+    provider = _provider(RespostaHTTPFalsa(400, {}, content=b"{}"))
+
+    with pytest.raises(RequisicaoWhatsAppInvalida):
+        provider.enviar_texto("69999999999", "Ola", "evento-400")

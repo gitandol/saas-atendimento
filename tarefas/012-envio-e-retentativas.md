@@ -17,17 +17,17 @@
 
 ## Ciclo TDD
 
-- [ ] Testar envio de mensagem `PENDENTE` com número normalizado, texto e UUID como chave de idempotência.
-- [ ] Testar transições válidas: `PENDENTE -> ENVIADA -> ENTREGUE` e `PENDENTE/ENVIADA -> FALHA`.
-- [ ] Testar que mensagem já enviada não é reenviada por task repetida.
-- [ ] Testar retentativas exponenciais em timeout, 429 e 5xx; não repetir 400/401 sem alteração de configuração.
-- [ ] Testar máximo de cinco tentativas e erro final sanitizado.
-- [ ] Testar atualização idempotente de recibo de entrega recebido por webhook.
-- [ ] Confirmar falhas antes da implementação.
-- [ ] Implementar task Celery com `autoretry_for` somente para exceções transitórias e jitter.
-- [ ] Auditar falha/reenvio manual e emitir logs/métricas por empresa sem conteúdo sensível.
-- [ ] Testar que o endpoint de reenvio apenas autoriza, converte o UUID e chama o service; elegibilidade, auditoria e enfileiramento ficam no service.
-- [ ] Executar testes e regressão.
+- [x] Testar envio de mensagem `PENDENTE` com número normalizado, texto e UUID como chave de idempotência.
+- [x] Testar transições válidas: `PENDENTE -> ENVIADA -> ENTREGUE` e `PENDENTE/ENVIADA -> FALHA`.
+- [x] Testar que mensagem já enviada não é reenviada por task repetida.
+- [x] Testar retentativas exponenciais em timeout, 429 e 5xx; não repetir 400/401 sem alteração de configuração.
+- [x] Testar máximo de cinco tentativas e erro final sanitizado.
+- [x] Testar atualização idempotente de recibo de entrega recebido por webhook.
+- [x] Confirmar falhas antes da implementação.
+- [x] Implementar task Celery com `autoretry_for` somente para exceções transitórias e jitter.
+- [x] Auditar falha/reenvio manual e emitir logs/métricas por empresa sem conteúdo sensível.
+- [x] Testar que o endpoint de reenvio apenas autoriza, converte o UUID e chama o service; elegibilidade, auditoria e enfileiramento ficam no service.
+- [x] Executar testes e regressão.
 
 ## Critérios de aceite
 
@@ -36,3 +36,12 @@
 - Reenvio manual exige permissão e mantém histórico das tentativas.
 
 **Commit sugerido:** `feat: envia mensagens com retentativas seguras`
+
+## Registro de execução
+
+- Data: 2026-08-27
+- Vermelho observado: 12 testes falharam pela ausência dos services, task, endpoint, normalização de recibos e classificação permanente de HTTP 400; o teste de webhook também confirmou que recibos eram ignorados. Um segundo ciclo vermelho confirmou que somente a falha final, e não cada tentativa, possuía histórico persistente.
+- Implementação realizada: envio idempotente pelo UUID, transições auditadas, cinco tentativas Celery com backoff exponencial e jitter, classificação de falhas transitórias e permanentes, recibos idempotentes pelo webhook e endpoint autenticado de reenvio da mesma `Mensagem`.
+- Refatorações: códigos de erro externos foram sanitizados; logs e metadados de auditoria passaram a registrar empresa, correlação e resultado sem conteúdo da mensagem; cada tentativa automática ganhou uma revisão persistente.
+- Comandos e resultados: testes focados `44 passed`; testes da task `3 passed`; `ruff check .` sem erros; `ruff format --check .` formatado; `python manage.py check` sem problemas; `uv run pytest` com `320 passed`.
+- Commit: `feat: envia mensagens com retentativas seguras`
