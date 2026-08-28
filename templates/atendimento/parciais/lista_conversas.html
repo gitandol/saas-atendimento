@@ -10,6 +10,8 @@
       data-modo="{{ conversa.modo }}"
       data-estado="{{ conversa.estado }}"
       data-atendente="{{ conversa.atendente_nome }}"
+      data-atendente-id="{{ conversa.atendente_id|default:'' }}"
+      data-versao="{{ conversa.versao }}"
       hx-get="/api/v1/atendimento/conversas/{{ conversa.id }}/mensagens"
       hx-target="#historico-conversa"
       hx-swap="innerHTML"

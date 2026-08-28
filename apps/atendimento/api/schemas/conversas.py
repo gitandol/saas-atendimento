@@ -17,6 +17,7 @@ class ConversaSaidaSchema(Schema):
     modo: str
     estado: str
     atendente: str
+    versao: int
     atualizado_em: datetime
 
 

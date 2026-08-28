@@ -27,10 +27,41 @@
     return scrollTop + Math.max(0, alturaDepois - alturaAntes);
   }
 
+  /** Retorna a acao somente quando um botao explicito submeteu o formulario. */
+  function acaoDoSubmit(submitter) {
+    return submitter?.dataset?.acaoConversa || null;
+  }
+
+  /** Deriva acoes e permissao manual sem depender do DOM. */
+  function estadoDosControles({
+    modo,
+    estado,
+    atendenteId,
+    usuarioId,
+  }) {
+    const acoes = [];
+    if (estado === "ABERTA" && modo === "IA") acoes.push("assumir");
+    if (estado === "ABERTA" && modo === "HUMANO") {
+      acoes.push("devolver-para-ia");
+    }
+    if (estado === "ABERTA") acoes.push("finalizar");
+    if (estado === "FINALIZADA") acoes.push("reabrir");
+    return {
+      acoes,
+      podeResponder:
+        estado === "ABERTA" &&
+        modo === "HUMANO" &&
+        atendenteId === usuarioId,
+      mostraModoReabertura: estado === "FINALIZADA",
+    };
+  }
+
   if (typeof module !== "undefined" && module.exports) {
     module.exports = {
+      acaoDoSubmit,
       calcularScrollPreservado,
       deveRolarAoFim,
+      estadoDosControles,
       filtrarMensagensNovas,
     };
   }
@@ -43,6 +74,7 @@
   const feedback = document.querySelector("#feedback-resposta");
   const erroCaixa = document.querySelector("#erro-caixa");
   let conversaAtiva = null;
+  let itemConversaAtiva = null;
   let preservarTopo = false;
   let alturaAntes = 0;
   let scrollAntes = 0;
@@ -68,6 +100,44 @@
         painel.removeAttribute("data-painel-ativo");
       }
     });
+  }
+
+  /** Aplica o estado corrente aos controles de transicao e resposta. */
+  function configurarEstado(conteiner, estado) {
+    if (!conteiner || !estado) return;
+    const controles = estadoDosControles({
+      ...estado,
+      usuarioId: conteiner.dataset.usuarioId,
+    });
+    conteiner.dataset.modo = estado.modo;
+    conteiner.dataset.estado = estado.estado;
+    conteiner.dataset.versao = estado.versao;
+    conteiner.dataset.atendenteId = estado.atendenteId || "";
+    const versao = conteiner.querySelector("[name='versao']");
+    if (versao) versao.value = estado.versao;
+    conteiner.querySelectorAll("[data-acao-conversa]").forEach((botao) => {
+      botao.hidden = !controles.acoes.includes(botao.dataset.acaoConversa);
+    });
+    const modoReabertura = conteiner.querySelector("[name='modo']");
+    const rotuloModo = conteiner.querySelector("label[for='modo-reabertura']");
+    const reabrindo = controles.mostraModoReabertura;
+    if (modoReabertura) {
+      modoReabertura.hidden = !reabrindo;
+      modoReabertura.disabled = !reabrindo;
+    }
+    if (rotuloModo) rotuloModo.hidden = !reabrindo;
+    texto.disabled = !controles.podeResponder;
+    enviar.disabled = !controles.podeResponder;
+    document.querySelector("#modo-conversa").textContent = estado.modo;
+    document.querySelector("#estado-conversa").textContent = estado.estado;
+    if (itemConversaAtiva) {
+      itemConversaAtiva.dataset.modo = estado.modo;
+      itemConversaAtiva.dataset.estado = estado.estado;
+      itemConversaAtiva.dataset.versao = estado.versao;
+      itemConversaAtiva.dataset.atendenteId = estado.atendenteId || "";
+      const metadados = itemConversaAtiva.querySelector(".metadados-conversa");
+      if (metadados) metadados.textContent = estado.modo + " · " + estado.estado;
+    }
   }
 
   /** Atualiza a consulta incremental a partir da ultima mensagem renderizada. */
@@ -102,6 +172,7 @@
     }
     const item = evento.target.closest("[data-abrir-conversa]");
     if (!item) return;
+    itemConversaAtiva = item;
     conversaAtiva = item.dataset.conversaId;
     document.querySelectorAll("[data-abrir-conversa]").forEach((conversa) => {
       conversa.setAttribute("aria-current", String(conversa === item));
@@ -112,9 +183,12 @@
     document.querySelector("#estado-conversa").textContent = item.dataset.estado;
     document.querySelector("#atendente-conversa").textContent =
       item.dataset.atendente || "Sem atendente";
-    const aberta = item.dataset.estado === "ABERTA";
-    texto.disabled = !aberta;
-    enviar.disabled = !aberta;
+    configurarEstado(document.querySelector("#acoes-conversa"), {
+      modo: item.dataset.modo,
+      estado: item.dataset.estado,
+      versao: item.dataset.versao,
+      atendenteId: item.dataset.atendenteId,
+    });
     formulario.setAttribute(
       "hx-post",
       `/api/v1/atendimento/conversas/${conversaAtiva}/mensagens`,
@@ -131,6 +205,33 @@
     );
   });
 
+  document.body.addEventListener("click", (evento) => {
+    const botao = evento.target.closest("[data-acao-conversa]");
+    if (!botao || !conversaAtiva) return;
+    const confirmacao = botao.dataset.confirmacao;
+    if (confirmacao && !window.confirm(confirmacao)) {
+      evento.preventDefault();
+      evento.stopImmediatePropagation();
+      return;
+    }
+    const acoes = botao.closest("#acoes-conversa");
+    acoes.setAttribute(
+      "hx-post",
+      "/api/v1/atendimento/conversas/" +
+        conversaAtiva +
+        "/" +
+        botao.dataset.acaoConversa,
+    );
+  }, true);
+
+  document.body.addEventListener("submit", (evento) => {
+    if (evento.target?.id !== "acoes-conversa") return;
+    if (!acaoDoSubmit(evento.submitter)) {
+      evento.preventDefault();
+      feedback.textContent = "Escolha uma acao para a conversa.";
+    }
+  }, true);
+
   document.body.addEventListener("htmx:beforeRequest", (evento) => {
     if (erroCaixa) erroCaixa.hidden = true;
     if (evento.detail.target !== historico) return;
@@ -146,6 +247,18 @@
   });
 
   document.body.addEventListener("htmx:afterSwap", (evento) => {
+    if (evento.detail.target?.id === "acoes-conversa") {
+      const acoes = document.querySelector("#acoes-conversa");
+      configurarEstado(acoes, {
+        modo: acoes.dataset.modo,
+        estado: acoes.dataset.estado,
+        versao: acoes.dataset.versao,
+        atendenteId: acoes.dataset.atendenteId,
+      });
+      document.querySelector("#atendente-conversa").textContent =
+        acoes.dataset.atendenteId ? "Responsavel atribuido" : "Sem atendente";
+      return;
+    }
     if (evento.detail.target !== historico) return;
     removerDuplicadas();
     if (preservarTopo) {

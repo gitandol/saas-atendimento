@@ -46,6 +46,7 @@ class EventoAuditoria(ModeloAppendOnly):
         related_name="eventos_auditoria",
     )
     origem = models.CharField(max_length=80)
+    justificativa = models.CharField(max_length=500, blank=True, default="")
     correlacao = models.CharField(max_length=80)
     criado_em = models.DateTimeField(auto_now_add=True)
 

@@ -48,6 +48,11 @@ def test_pagina_shell_tem_tres_areas_htmx_estados_e_ajuda() -> None:
     assert b'id="historico-conversa"' in conteudo
     assert b'id="detalhes-conversa"' in conteudo
     assert b'id="formulario-resposta-manual"' in conteudo
+    assert b'id="acoes-conversa"' in conteudo
+    assert b'data-acao-conversa="assumir"' in conteudo
+    assert b'data-acao-conversa="devolver-para-ia"' in conteudo
+    assert b'data-acao-conversa="finalizar"' in conteudo
+    assert b'data-acao-conversa="reabrir"' in conteudo
     assert b'maxlength="4096"' in conteudo
     assert b'role="status"' in conteudo
     assert b'aria-live="polite"' in conteudo

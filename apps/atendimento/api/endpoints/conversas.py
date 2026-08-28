@@ -61,6 +61,7 @@ def consultar_conversas(
                 "modo": conversa.modo,
                 "estado": conversa.estado,
                 "atendente": conversa.atendente_nome,
+                "versao": conversa.versao,
                 "atualizado_em": conversa.atualizado_em,
             }
             for conversa in conversas

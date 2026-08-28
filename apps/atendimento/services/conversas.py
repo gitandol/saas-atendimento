@@ -4,7 +4,6 @@ from typing import Any
 from uuid import UUID
 
 from django.db import transaction
-from django.utils import timezone
 
 from apps.atendimento.dto import ConversaDTO
 from apps.atendimento.models import Contato, Conversa
@@ -26,6 +25,7 @@ def conversa_para_dto(conversa: Conversa) -> ConversaDTO:
         atendente_id=conversa.atendente_id,
         ultima_mensagem_id=conversa.ultima_mensagem_id,
         contagem_nao_lida=conversa.contagem_nao_lida,
+        versao=conversa.versao,
         finalizada_em=conversa.finalizada_em,
         criado_em=conversa.criado_em,
         atualizado_em=conversa.atualizado_em,
@@ -83,6 +83,7 @@ def snapshot_conversa(conversa: Conversa) -> dict[str, Any]:
             str(conversa.ultima_mensagem_id) if conversa.ultima_mensagem_id else None
         ),
         "contagem_nao_lida": conversa.contagem_nao_lida,
+        "versao": conversa.versao,
         "finalizada_em": (
             conversa.finalizada_em.isoformat() if conversa.finalizada_em else None
         ),
@@ -98,6 +99,7 @@ def _auditar_conversa(
     ator: Usuario | None,
     origem: str,
     correlacao: str,
+    justificativa: str = "",
 ) -> None:
     """Registra o diff funcional de uma conversa."""
     depois = snapshot_conversa(conversa)
@@ -113,6 +115,7 @@ def _auditar_conversa(
         ator=ator,
         origem=origem,
         correlacao=correlacao,
+        justificativa=justificativa,
     )
 
 
@@ -155,8 +158,20 @@ def obter_ou_abrir_conversa(
     elif conversa.estado == Conversa.Estado.FINALIZADA:
         antes = snapshot_conversa(conversa)
         conversa.estado = Conversa.Estado.ABERTA
+        conversa.modo = Conversa.Modo.IA
+        conversa.atendente = None
         conversa.finalizada_em = None
-        conversa.save(update_fields=("estado", "finalizada_em", "atualizado_em"))
+        conversa.versao += 1
+        conversa.save(
+            update_fields=(
+                "estado",
+                "modo",
+                "atendente",
+                "finalizada_em",
+                "versao",
+                "atualizado_em",
+            )
+        )
         _auditar_conversa(
             empresa=empresa,
             conversa=conversa,
@@ -166,38 +181,4 @@ def obter_ou_abrir_conversa(
             origem=origem,
             correlacao=correlacao,
         )
-    return conversa_para_dto(conversa)
-
-
-@transaction.atomic
-def finalizar_conversa(
-    *,
-    empresa: Empresa,
-    conversa_id: UUID,
-    ator: Usuario | None,
-    origem: str,
-    correlacao: str,
-) -> ConversaDTO:
-    """Finaliza a conversa sem remover qualquer mensagem do historico."""
-    type(empresa).objects.select_for_update().get(pk=empresa.pk)
-    conversa = (
-        Conversa.objects.select_for_update()
-        .select_related("contato")
-        .get(pk=conversa_id, empresa=empresa)
-    )
-    if conversa.estado == Conversa.Estado.FINALIZADA:
-        return conversa_para_dto(conversa)
-    antes = snapshot_conversa(conversa)
-    conversa.estado = Conversa.Estado.FINALIZADA
-    conversa.finalizada_em = timezone.now()
-    conversa.save(update_fields=("estado", "finalizada_em", "atualizado_em"))
-    _auditar_conversa(
-        empresa=empresa,
-        conversa=conversa,
-        acao=EventoAuditoria.Acao.ATUALIZACAO,
-        antes=antes,
-        ator=ator,
-        origem=origem,
-        correlacao=correlacao,
-    )
     return conversa_para_dto(conversa)

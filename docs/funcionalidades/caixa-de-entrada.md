@@ -12,7 +12,16 @@ quando você está lendo mensagens antigas.
 
 ## Responder e reenviar
 
-Conversas abertas aceitam respostas manuais de até 4.096 caracteres. Mensagens
+Use **Assumir conversa** para interromper as respostas da IA e tornar-se o
+responsável atual. Somente esse responsável pode enviar respostas manuais de até
+4.096 caracteres. Use **Devolver para IA** quando a automação puder continuar;
+isso não cria respostas retroativas.
+
+Use **Finalizar** para encerrar o atendimento e bloquear qualquer nova resposta.
+Uma conversa finalizada pode ser reaberta explicitamente no modo indicado pela
+ação disponível. Confirmações evitam devoluções e encerramentos acidentais.
+
+Mensagens
 com falha exibem a ação **Reenviar**, que usa novamente o pipeline do WhatsApp.
 Conversas finalizadas permanecem disponíveis para consulta, mas não aceitam
 novas respostas.

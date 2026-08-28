@@ -89,6 +89,7 @@ def test_lista_conversas_publica_contrato_ordenado_e_filtrado() -> None:
             "modo": "HUMANO",
             "estado": "ABERTA",
             "atendente": "",
+            "versao": 1,
             "atualizado_em": resposta.json()["conversas"][0]["atualizado_em"],
         }
     ]
@@ -239,6 +240,12 @@ def test_envio_manual_cria_mensagem_pendente_e_retorna_202() -> None:
     """Falha se a API nao persistir e encaminhar a resposta pelo pipeline."""
     conversa = ConversaFactory()
     cliente = _cliente_membro(conversa.empresa)
+    assumida = cliente.post(
+        f"/api/v1/atendimento/conversas/{conversa.id}/assumir",
+        data={"versao": conversa.versao},
+        content_type="application/json",
+    )
+    assert assumida.status_code == 200
 
     with patch("apps.whatsapp.services.enviar_mensagem.solicitar_envio") as solicitar:
         resposta = cliente.post(
@@ -268,7 +275,7 @@ def test_historico_valida_limite_do_cursor() -> None:
 
 def test_endpoints_da_caixa_nao_importam_models_tasks_ou_integracoes() -> None:
     """Falha se a fronteira HTTP ultrapassar services e schemas."""
-    for nome in ("conversas.py", "mensagens.py"):
+    for nome in ("acoes_conversa.py", "conversas.py", "mensagens.py"):
         arquivo = Path("apps/atendimento/api/endpoints") / nome
         arvore = ast.parse(arquivo.read_text(encoding="utf-8"))
         importacoes = {

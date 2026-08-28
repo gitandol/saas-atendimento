@@ -4,8 +4,10 @@ const assert = require("node:assert/strict");
 const test = require("node:test");
 
 const {
+  acaoDoSubmit,
   calcularScrollPreservado,
   deveRolarAoFim,
+  estadoDosControles,
   filtrarMensagensNovas,
 } = require("../../static/src/js/caixa_entrada.js");
 
@@ -44,5 +46,57 @@ test("preserva a mensagem visivel ao adicionar historico antigo", () => {
       alturaDepois: 1250,
     }),
     470,
+  );
+});
+
+
+test("habilita resposta somente para o responsavel humano atual", () => {
+  assert.deepEqual(
+    estadoDosControles({
+      modo: "HUMANO",
+      estado: "ABERTA",
+      atendenteId: "u-1",
+      usuarioId: "u-1",
+    }),
+    {
+      acoes: ["devolver-para-ia", "finalizar"],
+      podeResponder: true,
+      mostraModoReabertura: false,
+    },
+  );
+  assert.equal(
+    estadoDosControles({
+      modo: "HUMANO",
+      estado: "ABERTA",
+      atendenteId: "u-2",
+      usuarioId: "u-1",
+    }).podeResponder,
+    false,
+  );
+});
+
+
+test("oferece reabertura e bloqueia resposta quando finalizada", () => {
+  assert.deepEqual(
+    estadoDosControles({
+      modo: "IA",
+      estado: "FINALIZADA",
+      atendenteId: "",
+      usuarioId: "u-1",
+    }),
+    {
+      acoes: ["reabrir"],
+      podeResponder: false,
+      mostraModoReabertura: true,
+    },
+  );
+});
+
+
+test("submit sem botao nao escolhe uma transicao implicitamente", () => {
+  assert.equal(acaoDoSubmit(null), null);
+  assert.equal(
+    acaoDoSubmit({dataset: {acaoConversa: "finalizar"}}),
+    "finalizar",
   );
 });

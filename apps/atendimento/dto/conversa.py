@@ -18,6 +18,7 @@ class ConversaDTO:
     atendente_id: UUID | None
     ultima_mensagem_id: UUID | None
     contagem_nao_lida: int
+    versao: int
     finalizada_em: datetime | None
     criado_em: datetime
     atualizado_em: datetime

@@ -1,0 +1,46 @@
+<form
+  id="acoes-conversa"
+  class="acoes-conversa"
+  data-modo="{{ conversa.modo }}"
+  data-estado="{{ conversa.estado }}"
+  data-versao="{{ conversa.versao }}"
+  data-atendente-id="{{ conversa.atendente_id|default:'' }}"
+  data-usuario-id="{{ request.user.id }}"
+  hx-post=""
+  hx-ext="json-enc"
+  hx-target="#acoes-conversa"
+  hx-swap="outerHTML"
+  hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+>
+  <input type="hidden" name="versao" value="{{ conversa.versao|default:1 }}">
+  <label class="somente-leitor" for="justificativa-acao">Justificativa opcional</label>
+  <input
+    id="justificativa-acao"
+    name="justificativa"
+    maxlength="500"
+    placeholder="Justificativa opcional"
+  >
+  <label for="modo-reabertura"
+    {% if conversa.estado != "FINALIZADA" %}hidden{% endif %}
+  >Reabrir em</label>
+  <select id="modo-reabertura" name="modo"
+    {% if conversa.estado != "FINALIZADA" %}hidden disabled{% endif %}
+  >
+    <option value="IA">IA</option>
+    <option value="HUMANO">Humano</option>
+  </select>
+  <button type="submit" data-acao-conversa="assumir"
+    {% if conversa.estado != "ABERTA" or conversa.modo != "IA" %}hidden{% endif %}
+  >Assumir conversa</button>
+  <button type="submit" data-acao-conversa="devolver-para-ia"
+    data-confirmacao="Deseja devolver esta conversa para a IA?"
+    {% if conversa.estado != "ABERTA" or conversa.modo != "HUMANO" %}hidden{% endif %}
+  >Devolver para IA</button>
+  <button type="submit" data-acao-conversa="finalizar"
+    data-confirmacao="Deseja finalizar esta conversa?"
+    {% if conversa.estado != "ABERTA" %}hidden{% endif %}
+  >Finalizar</button>
+  <button type="submit" data-acao-conversa="reabrir"
+    {% if conversa.estado != "FINALIZADA" %}hidden{% endif %}
+  >Reabrir com IA</button>
+</form>

@@ -10,6 +10,7 @@ from apps.atendimento.tests.factories import (
     EmpresaFactory,
     UsuarioFactory,
 )
+from apps.empresas.models import MembroEmpresa
 
 
 @pytest.mark.django_db
@@ -46,13 +47,17 @@ def test_obter_ou_criar_contato_normaliza_e_nao_duplica() -> None:
 @pytest.mark.django_db
 def test_conversa_e_aberta_finalizada_e_reaberta_explicitamente() -> None:
     """Reutiliza o historico finalizado apenas pelo service de abertura."""
-    from apps.atendimento.services.conversas import (
-        finalizar_conversa,
-        obter_ou_abrir_conversa,
-    )
+    from apps.atendimento.services.assumir_conversa import assumir_conversa
+    from apps.atendimento.services.conversas import obter_ou_abrir_conversa
+    from apps.atendimento.services.finalizar_conversa import finalizar_conversa
 
     contato = ContatoFactory()
     ator = UsuarioFactory()
+    MembroEmpresa.objects.create(
+        empresa=contato.empresa,
+        usuario=ator,
+        papel=MembroEmpresa.Papel.ATENDENTE,
+    )
     aberta = obter_ou_abrir_conversa(
         empresa=contato.empresa,
         contato_id=contato.id,
@@ -60,10 +65,21 @@ def test_conversa_e_aberta_finalizada_e_reaberta_explicitamente() -> None:
         origem="teste",
         correlacao="abrir",
     )
+    assumida = assumir_conversa(
+        empresa=contato.empresa,
+        conversa_id=aberta.id,
+        ator=ator,
+        versao=aberta.versao,
+        justificativa="",
+        origem="teste",
+        correlacao="assumir",
+    )
     finalizada = finalizar_conversa(
         empresa=contato.empresa,
         conversa_id=aberta.id,
         ator=ator,
+        versao=assumida.versao,
+        justificativa="",
         origem="teste",
         correlacao="finalizar",
     )
@@ -78,6 +94,9 @@ def test_conversa_e_aberta_finalizada_e_reaberta_explicitamente() -> None:
     assert aberta.id == reaberta.id
     assert finalizada.estado == Conversa.Estado.FINALIZADA
     assert reaberta.estado == Conversa.Estado.ABERTA
+    assert reaberta.modo == Conversa.Modo.IA
+    assert reaberta.atendente_id is None
+    assert reaberta.versao == finalizada.versao + 1
     assert reaberta.finalizada_em is None
 
 
@@ -126,6 +145,10 @@ def test_registrar_saida_atualiza_ultima_mensagem_sem_incrementar_nao_lidas() ->
     from apps.atendimento.services.mensagens import registrar_mensagem
 
     conversa = ConversaFactory(contagem_nao_lida=3)
+    ator = UsuarioFactory()
+    conversa.modo = Conversa.Modo.HUMANO
+    conversa.atendente = ator
+    conversa.save(update_fields=("modo", "atendente"))
     mensagem = registrar_mensagem(
         empresa=conversa.empresa,
         conversa_id=conversa.id,
@@ -134,7 +157,7 @@ def test_registrar_saida_atualiza_ultima_mensagem_sem_incrementar_nao_lidas() ->
         texto="Vamos ajudar",
         identificador_externo="",
         status=Mensagem.Status.PENDENTE,
-        ator=UsuarioFactory(),
+        ator=ator,
         origem="api",
         correlacao="saida-1",
     )
@@ -142,6 +165,48 @@ def test_registrar_saida_atualiza_ultima_mensagem_sem_incrementar_nao_lidas() ->
     conversa.refresh_from_db()
     assert conversa.ultima_mensagem_id == mensagem.id
     assert conversa.contagem_nao_lida == 3
+
+
+@pytest.mark.django_db
+def test_registrar_saida_reforca_condutor_atual_da_conversa() -> None:
+    """Recusa IA em modo humano e atendente sem responsabilidade."""
+    from django.core.exceptions import PermissionDenied
+
+    from apps.atendimento.services.mensagens import registrar_mensagem
+
+    conversa = ConversaFactory()
+    responsavel = UsuarioFactory()
+    outro = UsuarioFactory()
+    conversa.modo = Conversa.Modo.HUMANO
+    conversa.atendente = responsavel
+    conversa.save(update_fields=("modo", "atendente"))
+
+    with pytest.raises(ValidationError):
+        registrar_mensagem(
+            empresa=conversa.empresa,
+            conversa_id=conversa.id,
+            direcao=Mensagem.Direcao.SAIDA,
+            autor=Mensagem.Autor.IA,
+            texto="IA bloqueada",
+            identificador_externo="",
+            status=Mensagem.Status.PENDENTE,
+            ator=None,
+            origem="task_ia",
+            correlacao="ia-bloqueada",
+        )
+    with pytest.raises(PermissionDenied):
+        registrar_mensagem(
+            empresa=conversa.empresa,
+            conversa_id=conversa.id,
+            direcao=Mensagem.Direcao.SAIDA,
+            autor=Mensagem.Autor.ATENDENTE,
+            texto="Terceiro bloqueado",
+            identificador_externo="",
+            status=Mensagem.Status.PENDENTE,
+            ator=outro,
+            origem="api",
+            correlacao="terceiro-bloqueado",
+        )
 
 
 @pytest.mark.django_db

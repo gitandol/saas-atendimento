@@ -34,6 +34,7 @@ def registrar_alteracao(
     ator: Usuario | None,
     origem: str,
     correlacao: str,
+    justificativa: str = "",
 ) -> EventoAuditoria:
     """Cria o proximo snapshot e seu evento na mesma transacao."""
     type(empresa).objects.select_for_update().get(pk=empresa.pk)
@@ -67,5 +68,6 @@ def registrar_alteracao(
         campos_alterados=list(campos_alterados),
         ator=ator,
         origem=origem,
+        justificativa=justificativa.strip(),
         correlacao=correlacao,
     )

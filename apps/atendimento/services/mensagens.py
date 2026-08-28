@@ -3,7 +3,7 @@
 from typing import Any
 from uuid import UUID
 
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 
 from apps.atendimento.dto import MensagemDTO
@@ -139,6 +139,22 @@ def registrar_mensagem(
     )
     if conversa.estado != Conversa.Estado.ABERTA:
         raise ValidationError({"conversa": "A conversa esta finalizada."})
+    if (
+        direcao == Mensagem.Direcao.SAIDA
+        and autor == Mensagem.Autor.IA
+        and conversa.modo != Conversa.Modo.IA
+    ):
+        raise ValidationError({"conversa": "A conversa esta em atendimento humano."})
+    if (
+        direcao == Mensagem.Direcao.SAIDA
+        and autor == Mensagem.Autor.ATENDENTE
+        and (
+            conversa.modo != Conversa.Modo.HUMANO
+            or ator is None
+            or conversa.atendente_id != ator.id
+        )
+    ):
+        raise PermissionDenied
     contato = Contato.objects.select_for_update().get(
         pk=conversa.contato_id,
         empresa=empresa,

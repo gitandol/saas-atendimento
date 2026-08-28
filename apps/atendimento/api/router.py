@@ -2,9 +2,11 @@
 
 from ninja import Router
 
+from apps.atendimento.api.endpoints.acoes_conversa import router as acoes_router
 from apps.atendimento.api.endpoints.conversas import router as conversas_router
 from apps.atendimento.api.endpoints.mensagens import router as mensagens_router
 
 router = Router()
+router.add_router("", acoes_router)
 router.add_router("", conversas_router)
 router.add_router("", mensagens_router)

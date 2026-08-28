@@ -80,6 +80,9 @@ def test_enviar_resposta_manual_cria_pendente_e_solicita_pipeline() -> None:
 
     conversa = ConversaFactory()
     usuario = _membro(conversa)
+    conversa.modo = Conversa.Modo.HUMANO
+    conversa.atendente = usuario
+    conversa.save(update_fields=("modo", "atendente"))
 
     with patch("apps.whatsapp.services.enviar_mensagem.solicitar_envio") as solicitar:
         resultado = enviar_resposta_manual(
@@ -106,6 +109,9 @@ def test_enviar_resposta_manual_recusa_texto_invalido(texto: str) -> None:
 
     conversa = ConversaFactory()
     usuario = _membro(conversa)
+    conversa.modo = Conversa.Modo.HUMANO
+    conversa.atendente = usuario
+    conversa.save(update_fields=("modo", "atendente"))
 
     with pytest.raises(ValidationError):
         enviar_resposta_manual(
@@ -143,4 +149,33 @@ def test_enviar_resposta_manual_recusa_finalizada_e_nao_membro() -> None:
             texto="Nao autorizado",
             ator=UsuarioFactory(),
             correlacao="manual-sem-membro",
+        )
+
+
+@pytest.mark.django_db
+def test_enviar_resposta_manual_exige_modo_humano_e_responsavel_atual() -> None:
+    """Falha se IA ou outro atendente puder publicar uma resposta manual."""
+    from apps.atendimento.services.respostas_manuais import enviar_resposta_manual
+
+    conversa = ConversaFactory()
+    responsavel = _membro(conversa)
+    outro = _membro(conversa)
+    with pytest.raises(PermissionDenied):
+        enviar_resposta_manual(
+            empresa=conversa.empresa,
+            conversa_id=conversa.id,
+            texto="Nao enviar em modo IA",
+            ator=responsavel,
+            correlacao="manual-ia",
+        )
+    conversa.modo = Conversa.Modo.HUMANO
+    conversa.atendente = responsavel
+    conversa.save(update_fields=("modo", "atendente"))
+    with pytest.raises(PermissionDenied):
+        enviar_resposta_manual(
+            empresa=conversa.empresa,
+            conversa_id=conversa.id,
+            texto="Nao sou responsavel",
+            ator=outro,
+            correlacao="manual-outro",
         )

@@ -68,14 +68,18 @@ def restaurar_revisao(
         raise RevisaoNaoRestauravel("O snapshot contem valores protegidos.")
 
     objeto = _objeto_da_revisao(empresa, revisao)
-    campos = {
-        campo.name: campo
-        for campo in objeto._meta.concrete_fields
-        if campo.editable
-        and not campo.primary_key
-        and not campo.auto_created
-        and campo.name != "empresa"
-    }
+    campos = {}
+    for campo in objeto._meta.concrete_fields:
+        if (
+            not campo.editable
+            or campo.primary_key
+            or campo.auto_created
+            or campo.name == "empresa"
+        ):
+            continue
+        campos[campo.name] = campo
+        if campo.is_relation:
+            campos[campo.attname] = campo
     aplicaveis = [nome for nome in revisao.snapshot if nome in campos]
     if not aplicaveis:
         raise RevisaoNaoRestauravel("O snapshot nao possui campos restauraveis.")
@@ -84,15 +88,29 @@ def restaurar_revisao(
         nome: _valor_json(campos[nome].value_from_object(objeto)) for nome in aplicaveis
     }
     depois = {nome: revisao.snapshot[nome] for nome in aplicaveis}
+    conversa = objeto._meta.label_lower == "atendimento.conversa"
+    if conversa:
+        versao_atual = objeto.versao
+        if "versao" not in aplicaveis:
+            aplicaveis.append("versao")
+        antes["versao"] = versao_atual
+        depois["versao"] = versao_atual + 1
     for nome, valor in depois.items():
         campo = campos[nome]
         atributo = campo.attname if campo.is_relation else campo.name
         setattr(objeto, atributo, valor)
+    if conversa and (
+        (objeto.modo == "IA" and objeto.atendente_id is not None)
+        or (objeto.modo == "HUMANO" and objeto.atendente_id is None)
+    ):
+        raise RevisaoNaoRestauravel(
+            "O snapshot viola a responsabilidade atual da conversa."
+        )
     try:
         objeto.full_clean()
     except ValidationError as erro:
         raise RevisaoNaoRestauravel("O snapshot viola as regras atuais.") from erro
-    objeto.save(update_fields=aplicaveis)
+    objeto.save(update_fields={campos[nome].name for nome in aplicaveis})
     if not isinstance(objeto, Empresa) and objeto.empresa_id != empresa.pk:
         raise ObjectDoesNotExist
     return registrar_alteracao(
