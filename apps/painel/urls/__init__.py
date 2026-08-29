@@ -1,0 +1,1 @@
+"""Rotas do painel operacional."""

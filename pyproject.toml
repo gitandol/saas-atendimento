@@ -60,6 +60,8 @@ source_modules = [
     "apps.ia.views",
     "apps.nucleo.api",
     "apps.nucleo.views",
+    "apps.painel.api",
+    "apps.painel.views",
     "apps.whatsapp.api",
     "apps.whatsapp.views",
 ]
@@ -84,6 +86,7 @@ source_modules = [
     "apps.empresas.services",
     "apps.ia.services",
     "apps.nucleo.services",
+    "apps.painel.services",
     "apps.whatsapp.services",
 ]
 forbidden_modules = [

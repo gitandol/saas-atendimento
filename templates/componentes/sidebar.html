@@ -7,6 +7,10 @@
     </span>
   </div>
   <nav aria-label="Principal">
+    <a class="item-navegacao{% if "/painel/" in request.path %} item-navegacao-ativo{% endif %}" href="/painel/"{% if "/painel/" in request.path %} aria-current="page"{% endif %}>
+      <span aria-hidden="true">&#9638;</span>
+      <span class="sidebar-rotulo">Dashboard</span>
+    </a>
     <a class="item-navegacao{% if request.path == "/perfil/" %} item-navegacao-ativo{% endif %}" href="/perfil/"{% if request.path == "/perfil/" %} aria-current="page"{% endif %}>
       <span aria-hidden="true">&#9679;</span>
       <span class="sidebar-rotulo">Perfil</span>

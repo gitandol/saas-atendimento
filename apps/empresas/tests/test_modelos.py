@@ -1,6 +1,7 @@
 """Testes dos modelos que vinculam usuarios a empresas."""
 
 import pytest
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 
 from apps.contas.models import Usuario
@@ -47,6 +48,34 @@ def test_empresa_armazena_configuracao_e_versao_de_atualizacao() -> None:
     assert empresa.site == "https://clinica.example.com"
     assert empresa.instrucoes_atendimento == "Priorize urgencias."
     assert empresa.atualizado_em is not None
+
+
+@pytest.mark.django_db
+def test_empresa_define_fuso_horario_operacional() -> None:
+    """Falha se a empresa nao possuir fuso IANA valido com padrao seguro."""
+    empresa = Empresa.objects.create(nome="Empresa do Acre")
+
+    assert empresa.fuso_horario == "America/Rio_Branco"
+
+    empresa.fuso_horario = "America/Sao_Paulo"
+    empresa.full_clean()
+    empresa.save()
+    empresa.refresh_from_db()
+
+    assert empresa.fuso_horario == "America/Sao_Paulo"
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize(
+    "fuso_invalido",
+    ["Marte/Olympus", "/America/Sao_Paulo"],
+)
+def test_empresa_recusa_fuso_horario_desconhecido(fuso_invalido: str) -> None:
+    """Falha se um identificador que ZoneInfo desconhece for persistido."""
+    empresa = Empresa(nome="Empresa invalida", fuso_horario=fuso_invalido)
+
+    with pytest.raises(ValidationError, match="Fuso horario invalido"):
+        empresa.full_clean()
 
 
 @pytest.mark.django_db

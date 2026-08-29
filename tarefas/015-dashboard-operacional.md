@@ -26,16 +26,16 @@
 
 ## Ciclo TDD
 
-- [ ] Criar fixtures com horários próximos à virada do dia e testar timezone da empresa.
-- [ ] Testar service de métricas sem dados, com dados mistos e sem vazamento entre empresas.
-- [ ] Testar que dashboard executa quantidade limitada de queries e usa cache de 30 segundos por empresa.
-- [ ] Testar visibilidade de alertas de IA/WhatsApp desconectados e links para configuração.
-- [ ] Confirmar falhas antes da implementação.
-- [ ] Implementar dataclass imutável de métricas e consultas agregadas.
-- [ ] Implementar endpoint fino que converte a dataclass em schema de saída e página-shell que o consulta por HTMX.
-- [ ] Criar cartões inspirados na referência visual, sem gráficos decorativos ou metas inexistentes.
-- [ ] Adicionar atualização HTMX dos cartões, ajuda e estados de carregamento/erro.
-- [ ] Executar testes, inspeção responsiva e regressão.
+- [x] Criar fixtures com horários próximos à virada do dia e testar timezone da empresa.
+- [x] Testar service de métricas sem dados, com dados mistos e sem vazamento entre empresas.
+- [x] Testar que dashboard executa quantidade limitada de queries e usa cache de 30 segundos por empresa.
+- [x] Testar visibilidade de alertas de IA/WhatsApp desconectados e links para configuração.
+- [x] Confirmar falhas antes da implementação.
+- [x] Implementar dataclass imutável de métricas e consultas agregadas.
+- [x] Implementar endpoint fino que converte a dataclass em schema de saída e página-shell que o consulta por HTMX.
+- [x] Criar cartões inspirados na referência visual, sem gráficos decorativos ou metas inexistentes.
+- [x] Adicionar atualização HTMX dos cartões, ajuda e estados de carregamento/erro.
+- [x] Executar testes, inspeção responsiva e regressão.
 
 ## Critérios de aceite
 
@@ -44,3 +44,13 @@
 - Dashboard permanece útil com zero conversas.
 
 **Commit sugerido:** `feat: adiciona dashboard operacional`
+
+## Registro de execução
+
+- Data: 2026-08-29
+- Vermelho observado: campo `Empresa.fuso_horario` ausente; service `apps.painel.services` ausente; rotas `/api/v1/painel/metricas` e `/painel/` retornando 404; arquivos de fronteira inexistentes.
+- Implementação realizada: fuso IANA por empresa com migração; dataclass imutável; quatro consultas agregadas isoladas por tenant; cache de 30 segundos por empresa e data local; API Django Ninja; página-shell HTMX; oito cartões; alertas acionáveis; ajuda e navegação.
+- Refatorações: agregações separadas por domínio, limites do dia convertidos para UTC e contratos do Import Linter ampliados para o módulo `painel`.
+- Comandos e resultados: testes focados `17 passed`; suíte completa `374 passed, 1 skipped`; `ruff check .` verde; `ruff format --check .` verde; `python manage.py check` sem problemas; `makemigrations --check --dry-run` sem alterações; `lint-imports` com 2 contratos preservados.
+- Inspeção responsiva: estrutura revisada com grades em 3/2/1 colunas, alertas empilhados em telas estreitas e uso exclusivo das variáveis dos temas claro/escuro. A conexão automatizada ao navegador ficou indisponível por erro do sandbox, sem screenshot.
+- Commit: `feat: adiciona dashboard operacional`

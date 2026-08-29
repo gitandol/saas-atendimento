@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Dashboard | Atendimento{% endblock %}
+
+{% block estilos %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'src/css/dashboard.css' %}">
+{% endblock %}
+
+{% block conteudo %}
+  <section class="cabecalho-pagina">
+    <div>
+      <p class="rotulo-pagina">Operacao</p>
+      <h1>Dashboard</h1>
+      <p>Acompanhe a situacao atual dos atendimentos e integracoes.</p>
+    </div>
+    {% include "componentes/link_ajuda.html" with topico_ajuda="dashboard" %}
+  </section>
+
+  <p id="erro-dashboard" class="alerta alerta-dashboard" role="alert" hidden>
+    Nao foi possivel atualizar o dashboard. Tente novamente.
+  </p>
+
+  <section
+    id="metricas-dashboard"
+    hx-get="/api/v1/painel/metricas"
+    hx-trigger="load, every 30s"
+    hx-swap="innerHTML"
+    hx-on::before-request="document.getElementById('erro-dashboard').hidden = true"
+    hx-on::response-error="document.getElementById('erro-dashboard').hidden = false"
+    aria-live="polite"
+    aria-label="Metricas operacionais"
+  >
+    <p class="estado-dashboard" role="status">Carregando metricas...</p>
+  </section>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{% static 'vendor/htmx.min.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,1 @@
+"""Endpoints do painel operacional."""

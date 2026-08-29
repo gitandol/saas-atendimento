@@ -1,0 +1,55 @@
+<div class="alertas-integracoes" aria-label="Alertas de integracao">
+  {% if metricas.estado_openai != "ATIVA" %}
+    <article class="alerta alerta-integracao" data-alerta-integracao="openai">
+      <div>
+        <strong>OpenAI precisa de atencao</strong>
+        <p>Ative as respostas automaticas e confirme a credencial.</p>
+      </div>
+      <a class="botao-secundario" href="/ia/configuracao/">Configurar IA</a>
+    </article>
+  {% endif %}
+  {% if metricas.estado_evolution != "CONECTADO" %}
+    <article class="alerta alerta-integracao" data-alerta-integracao="evolution">
+      <div>
+        <strong>WhatsApp desconectado</strong>
+        <p>Revise a instancia da Evolution API para receber e enviar mensagens.</p>
+      </div>
+      <a class="botao-secundario" href="/whatsapp/configuracao/">Configurar WhatsApp</a>
+    </article>
+  {% endif %}
+</div>
+
+<div class="grade-metricas">
+  <article class="cartao cartao-metrica" data-metrica="conversas-abertas">
+    <span>Conversas abertas</span>
+    <strong>{{ metricas.conversas_abertas }}</strong>
+  </article>
+  <article class="cartao cartao-metrica" data-metrica="conversas-ia">
+    <span>Em modo IA</span>
+    <strong>{{ metricas.conversas_ia }}</strong>
+  </article>
+  <article class="cartao cartao-metrica" data-metrica="conversas-humano">
+    <span>Em modo humano</span>
+    <strong>{{ metricas.conversas_humano }}</strong>
+  </article>
+  <article class="cartao cartao-metrica" data-metrica="mensagens-recebidas">
+    <span>Recebidas hoje</span>
+    <strong>{{ metricas.mensagens_recebidas_hoje }}</strong>
+  </article>
+  <article class="cartao cartao-metrica" data-metrica="mensagens-enviadas">
+    <span>Enviadas hoje</span>
+    <strong>{{ metricas.mensagens_enviadas_hoje }}</strong>
+  </article>
+  <article class="cartao cartao-metrica" data-metrica="mensagens-falha">
+    <span>Mensagens com falha</span>
+    <strong>{{ metricas.mensagens_com_falha }}</strong>
+  </article>
+  <article class="cartao cartao-metrica cartao-estado" data-metrica="estado-openai">
+    <span>OpenAI</span>
+    <strong>{{ metricas.estado_openai }}</strong>
+  </article>
+  <article class="cartao cartao-metrica cartao-estado" data-metrica="estado-evolution">
+    <span>Evolution API</span>
+    <strong>{{ metricas.estado_evolution }}</strong>
+  </article>
+</div>
