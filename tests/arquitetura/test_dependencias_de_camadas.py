@@ -78,3 +78,26 @@ def test_contratos_declaram_apps_de_contas_e_empresas() -> None:
         "apps.contas.services",
         "apps.empresas.services",
     }
+
+
+def test_services_proibem_fronteiras_http_de_todos_os_dominios() -> None:
+    """Evita lacunas quando um novo service e adicionado ao contrato."""
+    with Path("pyproject.toml").open("rb") as arquivo:
+        contratos = tomllib.load(arquivo)["tool"]["importlinter"]["contracts"]
+
+    contrato = next(
+        item
+        for item in contratos
+        if item["name"] == "Services nao importam fronteiras HTTP"
+    )
+    proibidas = set(contrato["forbidden_modules"])
+    esperadas = {
+        fronteira
+        for fonte in contrato["source_modules"]
+        for fronteira in (
+            fonte.replace(".services", ".api"),
+            fonte.replace(".services", ".views"),
+        )
+    }
+
+    assert proibidas >= esperadas

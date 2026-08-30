@@ -122,7 +122,10 @@ def test_provider_obtem_qrcode_sem_persistir_payload_externo() -> None:
     chamada = provider.cliente.chamadas[0]
     assert chamada["metodo"] == "GET"
     assert chamada["url"] == "https://evolution.example.com/instance/connect/empresa-1"
-    assert chamada["headers"] == {"apikey": "chave-evolution"}
+    assert chamada["headers"]["apikey"] == "chave-evolution"
+    from uuid import UUID
+
+    UUID(chamada["headers"]["X-Correlation-ID"])
     assert chamada["timeout"] == 6.0
 
 
@@ -377,10 +380,11 @@ def test_provider_envia_texto_com_chave_de_idempotencia() -> None:
     chamada = provider.cliente.chamadas[0]
     assert chamada["metodo"] == "POST"
     assert chamada["json"] == {"number": "69999999999", "text": "Ola"}
-    assert chamada["headers"] == {
-        "apikey": "chave-evolution",
-        "Idempotency-Key": "evento-1",
-    }
+    assert chamada["headers"]["apikey"] == "chave-evolution"
+    assert chamada["headers"]["Idempotency-Key"] == "evento-1"
+    from uuid import UUID
+
+    UUID(chamada["headers"]["X-Correlation-ID"])
 
 
 def test_provider_classifica_400_como_falha_permanente() -> None:
@@ -391,3 +395,28 @@ def test_provider_classifica_400_como_falha_permanente() -> None:
 
     with pytest.raises(RequisicaoWhatsAppInvalida):
         provider.enviar_texto("69999999999", "Ola", "evento-400")
+
+
+def test_provider_propaga_correlacao_ao_evolution() -> None:
+    """Permite rastrear a chamada Evolution pelo mesmo identificador."""
+    from apps.nucleo.middleware.correlacao import (
+        definir_correlacao,
+        restaurar_correlacao,
+    )
+
+    provider = _provider(
+        RespostaHTTPFalsa(
+            200,
+            {"instance": {"state": "open"}},
+            content=b'{"instance":{"state":"open"}}',
+        )
+    )
+    token = definir_correlacao("corr-evolution")
+    try:
+        provider.consultar_estado()
+    finally:
+        restaurar_correlacao(token)
+
+    assert (
+        provider.cliente.chamadas[0]["headers"]["X-Correlation-ID"] == "corr-evolution"
+    )

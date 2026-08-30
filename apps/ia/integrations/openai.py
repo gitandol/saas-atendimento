@@ -10,6 +10,7 @@ from apps.ia.integrations.protocolos import (
     LimiteIAExcedido,
     RespostaIA,
 )
+from apps.nucleo.middleware.correlacao import obter_correlacao
 
 URL_CHAT_COMPLETIONS = "https://api.openai.com/v1/chat/completions"
 
@@ -59,6 +60,7 @@ class ProviderOpenAI:
                 headers={
                     "Authorization": f"Bearer {self._chave_api}",
                     "Content-Type": "application/json",
+                    "X-Correlation-ID": obter_correlacao(),
                 },
                 json={"model": modelo, "messages": mensagens},
                 timeout=self.timeout,

@@ -3,6 +3,8 @@
 import os
 from pathlib import Path
 
+from config.logging import CONFIGURACAO_LOGGING
+
 BASE_DIR = Path(__file__).resolve().parents[2]
 
 SECRET_KEY = os.getenv("SECRET_KEY", "")
@@ -11,6 +13,11 @@ ALLOWED_HOSTS = [
     host.strip()
     for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
     if host.strip()
+]
+CSRF_TRUSTED_ORIGINS = [
+    origem.strip()
+    for origem in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+    if origem.strip()
 ]
 
 INSTALLED_APPS = [
@@ -34,6 +41,7 @@ AUTH_USER_MODEL = "contas.Usuario"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "apps.nucleo.middleware.correlacao.CorrelacaoMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -45,6 +53,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "config.urls"
+DATA_UPLOAD_MAX_MEMORY_SIZE = 262_144
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -109,6 +119,8 @@ CACHES = {
     }
 }
 CELERY_BROKER_URL = REDIS_URL
+
+LOGGING = CONFIGURACAO_LOGGING
 CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 300

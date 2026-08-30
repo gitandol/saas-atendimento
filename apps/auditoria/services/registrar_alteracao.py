@@ -7,7 +7,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models, transaction
 
 from apps.auditoria.models import EventoAuditoria, RevisaoObjeto
-from apps.auditoria.services.sanitizar_snapshot import sanitizar_snapshot
+from apps.auditoria.services.sanitizar_snapshot import (
+    proteger_snapshot_restauravel,
+    sanitizar_snapshot,
+)
 from apps.contas.models import Usuario
 from apps.empresas.models import Empresa
 
@@ -55,7 +58,7 @@ def registrar_alteracao(
         tipo_objeto=tipo_objeto,
         objeto_id=objeto_id,
         numero=(ultima.numero + 1) if ultima else 1,
-        snapshot=sanitizar_snapshot(dict(depois)),
+        snapshot=proteger_snapshot_restauravel(dict(depois)),
     )
     return EventoAuditoria.objects.create(
         empresa=empresa,

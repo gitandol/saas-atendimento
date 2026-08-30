@@ -10,7 +10,10 @@ from django.db import models, transaction
 
 from apps.auditoria.models import EventoAuditoria, RevisaoObjeto
 from apps.auditoria.services.registrar_alteracao import registrar_alteracao
-from apps.auditoria.services.sanitizar_snapshot import VALOR_PROTEGIDO
+from apps.auditoria.services.sanitizar_snapshot import (
+    VALOR_PROTEGIDO,
+    restaurar_snapshot_protegido,
+)
 from apps.contas.models import Usuario
 from apps.empresas.models import Empresa
 
@@ -64,7 +67,8 @@ def restaurar_revisao(
         pk=revisao.pk,
         empresa=empresa,
     )
-    if _contem_valor_protegido(revisao.snapshot):
+    snapshot = restaurar_snapshot_protegido(revisao.snapshot)
+    if _contem_valor_protegido(snapshot):
         raise RevisaoNaoRestauravel("O snapshot contem valores protegidos.")
 
     objeto = _objeto_da_revisao(empresa, revisao)
@@ -80,14 +84,14 @@ def restaurar_revisao(
         campos[campo.name] = campo
         if campo.is_relation:
             campos[campo.attname] = campo
-    aplicaveis = [nome for nome in revisao.snapshot if nome in campos]
+    aplicaveis = [nome for nome in snapshot if nome in campos]
     if not aplicaveis:
         raise RevisaoNaoRestauravel("O snapshot nao possui campos restauraveis.")
 
     antes = {
         nome: _valor_json(campos[nome].value_from_object(objeto)) for nome in aplicaveis
     }
-    depois = {nome: revisao.snapshot[nome] for nome in aplicaveis}
+    depois = {nome: snapshot[nome] for nome in aplicaveis}
     conversa = objeto._meta.label_lower == "atendimento.conversa"
     if conversa:
         versao_atual = objeto.versao

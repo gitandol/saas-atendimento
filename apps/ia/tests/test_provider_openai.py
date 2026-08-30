@@ -157,3 +157,29 @@ def test_provider_traduz_conteudo_nao_textual_em_indisponibilidade(
     }
     with pytest.raises(IAIndisponivel):
         _provider(RespostaHTTPFalsa(200, payload)).gerar_resposta([], "gpt-4.1-mini")
+
+
+def test_provider_propaga_correlacao_ao_openai() -> None:
+    """Permite rastrear a chamada externa sem incluir o prompt no log."""
+    from apps.nucleo.middleware.correlacao import (
+        definir_correlacao,
+        restaurar_correlacao,
+    )
+
+    provider = _provider(
+        RespostaHTTPFalsa(
+            200,
+            {
+                "model": "gpt-test",
+                "choices": [{"message": {"content": "resposta"}}],
+                "usage": {"prompt_tokens": 1, "completion_tokens": 1},
+            },
+        )
+    )
+    token = definir_correlacao("corr-openai")
+    try:
+        provider.gerar_resposta([{"role": "user", "content": "entrada"}], "gpt-test")
+    finally:
+        restaurar_correlacao(token)
+
+    assert provider.cliente.chamada["headers"]["X-Correlation-ID"] == "corr-openai"

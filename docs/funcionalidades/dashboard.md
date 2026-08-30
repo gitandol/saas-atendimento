@@ -16,3 +16,7 @@ Os dados sao atualizados automaticamente a cada 30 segundos. Para reduzir consul
 Quando a OpenAI nao esta ativa, use **Configurar IA** para revisar a credencial e as respostas automaticas. Quando o WhatsApp nao esta conectado, use **Configurar WhatsApp** para revisar ou reconectar a instancia.
 
 Todas as contagens pertencem somente a empresa ativa. Um dashboard sem conversas continua valido e exibe zero em cada metrica.
+
+## Monitoramento
+
+Saude de processo e dependencias são separadas conforme o [guia de monitoramento](../operacao/monitoramento.md).

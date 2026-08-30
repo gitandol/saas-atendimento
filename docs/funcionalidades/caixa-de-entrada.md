@@ -28,3 +28,7 @@ novas respostas.
 
 Em telas pequenas, use **Voltar** e **Detalhes** para navegar entre a lista, a
 conversa e seus dados operacionais.
+
+## Contratos e suporte
+
+Estados de erro e correlacao seguem os [contratos da API](../api/contratos-e-erros.md).

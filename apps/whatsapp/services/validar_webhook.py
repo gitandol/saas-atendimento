@@ -1,13 +1,17 @@
-"""Autentica o webhook Evolution sem persistir ou expor seu token."""
+"""Autentica e limita o webhook sem persistir ou expor credenciais."""
 
 import hashlib
 import hmac
 from uuid import UUID
 
 from django.conf import settings
+from django.core.cache import cache
 
 from apps.empresas.models import Empresa
 from apps.whatsapp.models import ConfiguracaoWhatsApp
+
+LIMITE_WEBHOOK = 60
+JANELA_WEBHOOK_SEGUNDOS = 60
 
 
 class TokenWebhookInvalido(Exception):
@@ -16,6 +20,25 @@ class TokenWebhookInvalido(Exception):
 
 class ConfiguracaoWebhookInativa(Exception):
     """Indica que a empresa desativou sua integracao WhatsApp."""
+
+
+class LimiteWebhookExcedido(Exception):
+    """Indica que uma origem excedeu a janela publica do webhook."""
+
+
+def limitar_webhook(*, empresa_id: UUID, origem: str) -> None:
+    """Reserva uma requisicao usando somente um digest opaco no cache."""
+    digest = hashlib.sha256(f"{empresa_id}:{origem}".encode()).hexdigest()
+    chave = f"webhook:limite:{digest}"
+    if cache.add(chave, 1, timeout=JANELA_WEBHOOK_SEGUNDOS):
+        return
+    try:
+        quantidade = cache.incr(chave)
+    except ValueError:
+        limitar_webhook(empresa_id=empresa_id, origem=origem)
+        return
+    if quantidade > LIMITE_WEBHOOK:
+        raise LimiteWebhookExcedido
 
 
 def gerar_token_webhook(*, empresa_id: UUID) -> str:

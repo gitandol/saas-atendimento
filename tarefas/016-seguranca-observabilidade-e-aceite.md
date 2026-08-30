@@ -16,21 +16,21 @@
 
 ## Ciclo TDD e verificação
 
-- [ ] Escrever teste ponta a ponta pelas páginas e endpoints Ninja, com OpenAI/Evolution mockadas: login, configuração, webhook, resposta automática, envio, intervenção humana, resposta manual e finalização.
-- [ ] Escrever teste com duas empresas repetindo UUIDs externos e confirmar isolamento em modelos, views, serviços, cache e tasks.
-- [ ] Testar cabeçalhos seguros, CSRF, cookies `Secure/HttpOnly/SameSite`, hosts permitidos, limite de corpo, rate limit e redaction de logs.
-- [ ] Testar que toda operação interna exige sessão válida, empresa ativa e CSRF nas mutações; webhooks usam autenticação própria e não herdam sessão.
-- [ ] Testar o OpenAPI para rotas duplicadas, operation IDs instáveis, endpoints sem schema de erro e respostas que exponham campos sensíveis.
-- [ ] Executar import-linter e teste AST garantindo que `views` e `api` não importem models e que services não dependam da camada HTTP.
-- [ ] Testar healthchecks separados de web, banco, Redis e worker; dependências externas devem aparecer como degradadas sem derrubar `/saude/`.
-- [ ] Confirmar falhas antes dos ajustes finais.
-- [ ] Implementar ID de correlação propagado de HTTP para Celery e integrações.
-- [ ] Configurar logs JSON com empresa, conversa, mensagem, tarefa, duração e resultado, sem conteúdo de mensagens ou segredos.
-- [ ] Documentar variáveis de ambiente, migrations, coleta de estáticos, backup, restauração e rotação de chaves.
-- [ ] Executar `python manage.py check --deploy` com settings de produção e corrigir todos os alertas aplicáveis.
-- [ ] Executar `ruff check .`, `ruff format --check .`, `pytest --cov=apps --cov-fail-under=90` e `npm run css:build`.
+- [x] Escrever teste ponta a ponta pelas páginas e endpoints Ninja, com OpenAI/Evolution mockadas: login, configuração, webhook, resposta automática, envio, intervenção humana, resposta manual e finalização.
+- [x] Escrever teste com duas empresas repetindo UUIDs externos e confirmar isolamento em modelos, views, serviços, cache e tasks.
+- [x] Testar cabeçalhos seguros, CSRF, cookies `Secure/HttpOnly/SameSite`, hosts permitidos, limite de corpo, rate limit e redaction de logs.
+- [x] Testar que toda operação interna exige sessão válida, empresa ativa e CSRF nas mutações; webhooks usam autenticação própria e não herdam sessão.
+- [x] Testar o OpenAPI para rotas duplicadas, operation IDs instáveis, endpoints sem schema de erro e respostas que exponham campos sensíveis.
+- [x] Executar import-linter e teste AST garantindo que `views` e `api` não importem models e que services não dependam da camada HTTP.
+- [x] Testar healthchecks separados de web, banco, Redis e worker; dependências externas devem aparecer como degradadas sem derrubar `/saude/`.
+- [x] Confirmar falhas antes dos ajustes finais.
+- [x] Implementar ID de correlação propagado de HTTP para Celery e integrações.
+- [x] Configurar logs JSON com empresa, conversa, mensagem, tarefa, duração e resultado, sem conteúdo de mensagens ou segredos.
+- [x] Documentar variáveis de ambiente, migrations, coleta de estáticos, backup, restauração e rotação de chaves.
+- [x] Executar `python manage.py check --deploy` com settings de produção e corrigir todos os alertas aplicáveis.
+- [x] Executar `ruff check .`, `ruff format --check .`, `pytest --cov=apps --cov-fail-under=90` e `npm run css:build`.
 - [ ] Executar teste manual com sandbox Evolution/OpenAI somente em suíte marcada `externa`, após configurar credenciais fora do Git.
-- [ ] Registrar comandos, resultados, limitações conhecidas e evidência do cenário de aceite.
+- [x] Registrar comandos, resultados, limitações conhecidas e evidência do cenário de aceite.
 
 ## Critérios de aceite final
 
@@ -43,3 +43,15 @@
 - O MVP pode ser iniciado do zero usando somente README, `.env` e Docker Compose.
 
 **Commit sugerido:** `chore: valida seguranca operacao e aceite do mvp`
+
+## Registro de execução — 2026-08-30
+
+- TDD: falhas observadas antes das implementações de correlação, redaction, limites HTTP, healthchecks, OpenAPI, isolamento, fluxo integral e proteção cifrada de auditoria.
+- `python manage.py check --deploy --settings=config.settings.producao`: sem alertas, com variáveis sintéticas.
+- `ruff check .` e `ruff format --check .`: aprovados.
+- `pytest --cov=apps --cov-fail-under=90 -q`: 401 aprovados, 1 ignorado, cobertura total 96,60%.
+- `lint-imports --config pyproject.toml` e testes AST/OpenAPI: 2 contratos mantidos, 0 quebrados; 9 testes aprovados.
+- `npm run test:js` e `npm run css:build`: 10 testes aprovados e CSS compilado em Node Linux.
+- `docker compose config -q`: aprovado; probes separados para web, worker, PostgreSQL e Redis.
+- Backup/restauração: dump de 74.933 bytes restaurado em `atendimento_restore_tarefa016`; 29 migrations e 19 tabelas verificadas; banco temporário removido e dump preservado em `/tmp/tarefa016-atendimento-20260830.dump`.
+- Limitação conhecida: `pytest -m externa -q` selecionou 0 casos (402 desmarcados) e não há credenciais Evolution/OpenAI externas configuradas; nenhuma chamada real foi executada.

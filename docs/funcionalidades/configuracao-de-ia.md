@@ -10,3 +10,7 @@ Esta tela define como a assistente responde e conecta a empresa a OpenAI.
 4. Use **Remover chave** apenas quando quiser apagar explicitamente a credencial.
 
 A chave existente nunca volta para o navegador. O campo vazio preserva a credencial ja configurada. Falhas de credencial, limite ou indisponibilidade sao exibidas sem detalhes sensiveis.
+
+## Operacao
+
+Falhas externas são correlacionadas e sanitizadas conforme [monitoramento](../operacao/monitoramento.md).

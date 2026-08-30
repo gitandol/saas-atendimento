@@ -80,7 +80,7 @@ def login(request: HttpRequest, dados: LoginEntradaSchema):
 @router.post(
     "/logout",
     auth=SessionAuth(),
-    response={200: LogoutSaidaSchema},
+    response={200: LogoutSaidaSchema, 401: ErroSaidaSchema, 403: ErroSaidaSchema},
 )
 def logout(request: HttpRequest) -> dict[str, bool]:
     """Delega o encerramento da sessao autenticada."""

@@ -9,6 +9,7 @@ from urllib.parse import quote, urlsplit
 
 import requests
 
+from apps.nucleo.middleware.correlacao import obter_correlacao
 from apps.whatsapp.integrations.protocolos import (
     CredencialWhatsAppInvalida,
     EstadoConexao,
@@ -166,7 +167,7 @@ class ProviderEvolution:
         chave_idempotencia: str = "",
     ) -> object:
         """Executa chamada limitada e traduz falhas externas conhecidas."""
-        headers = {"apikey": self._chave_api}
+        headers = {"apikey": self._chave_api, "X-Correlation-ID": obter_correlacao()}
         if chave_idempotencia:
             headers["Idempotency-Key"] = chave_idempotencia
         argumentos: dict[str, object] = {

@@ -5,6 +5,7 @@ from json import JSONDecodeError
 from typing import Any
 from uuid import UUID, uuid4
 
+from django.core.exceptions import RequestDataTooBig
 from django.http import HttpRequest, JsonResponse
 from ninja import Router
 
@@ -19,7 +20,9 @@ from apps.whatsapp.services.receber_webhook import (
 )
 from apps.whatsapp.services.validar_webhook import (
     ConfiguracaoWebhookInativa,
+    LimiteWebhookExcedido,
     TokenWebhookInvalido,
+    limitar_webhook,
 )
 
 MAXIMO_PAYLOAD_BYTES = 262_144
@@ -79,7 +82,10 @@ def _ler_payload(request: HttpRequest) -> dict[str, Any]:
                 raise PayloadMuitoGrande
         except ValueError as erro:
             raise EventoEvolutionInvalido("Content-Length invalido.") from erro
-    corpo = request.body
+    try:
+        corpo = request.body
+    except RequestDataTooBig as erro:
+        raise PayloadMuitoGrande from erro
     if len(corpo) > MAXIMO_PAYLOAD_BYTES:
         raise PayloadMuitoGrande
     try:
@@ -98,6 +104,7 @@ def _ler_payload(request: HttpRequest) -> dict[str, Any]:
         400: WebhookEvolutionErroSchema,
         401: WebhookEvolutionErroSchema,
         409: WebhookEvolutionErroSchema,
+        429: WebhookEvolutionErroSchema,
         413: WebhookEvolutionErroSchema,
         415: WebhookEvolutionErroSchema,
         503: WebhookEvolutionErroSchema,
@@ -111,6 +118,10 @@ def webhook_evolution(
     """Valida a fronteira HTTP e delega todo comportamento ao service."""
     correlacao = _correlacao(request)
     try:
+        limitar_webhook(
+            empresa_id=empresa_id,
+            origem=request.META.get("REMOTE_ADDR", ""),
+        )
         payload = _ler_payload(request)
         resultado = receber_webhook(
             empresa_id=empresa_id,
@@ -130,6 +141,13 @@ def webhook_evolution(
             codigo="payload_muito_grande",
             mensagem="Payload excede o limite permitido.",
             status=413,
+            correlacao=correlacao,
+        )
+    except LimiteWebhookExcedido:
+        return _erro(
+            codigo="muitas_requisicoes",
+            mensagem="Limite de requisicoes excedido.",
+            status=429,
             correlacao=correlacao,
         )
     except EventoEvolutionInvalido:
