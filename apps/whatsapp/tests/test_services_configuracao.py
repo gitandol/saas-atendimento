@@ -1,6 +1,7 @@
 """Testes dos services de configuracao e conexao do WhatsApp."""
 
 from unittest.mock import patch
+from uuid import UUID
 
 import pytest
 from django.core.exceptions import PermissionDenied
@@ -326,6 +327,54 @@ def test_conectar_e_desconectar_atualizam_estado_e_auditoria(settings) -> None:
     assert desconectado.estado == EstadoConexao.DESCONECTADO
     assert EventoAuditoria.objects.filter(correlacao="conecta").exists()
     assert EventoAuditoria.objects.filter(correlacao="desconecta").exists()
+
+
+@pytest.mark.django_db
+def test_conectar_configura_webhook_da_empresa(settings) -> None:
+    """Impede conectar uma instancia incapaz de entregar mensagens recebidas."""
+    from apps.whatsapp.services.configurar_instancia import (
+        atualizar_configuracao,
+        conectar_instancia,
+    )
+
+    settings.IA_CHAVE_CRIPTOGRAFIA = "mestre-webhook"
+    settings.EVOLUTION_WEBHOOK_BASE_URL = "http://web:8000"
+    empresa = Empresa.objects.create(
+        id=UUID("11111111-1111-1111-1111-111111111111"),
+        nome="Empresa webhook automatico",
+    )
+    ator = _membro(
+        empresa,
+        MembroEmpresa.Papel.ADMINISTRADOR,
+        "webhook-automatico@example.com",
+    )
+    atualizar_configuracao(
+        empresa=empresa,
+        ator=ator,
+        dados=_dados(),
+        correlacao="configura-webhook",
+    )
+
+    with (
+        patch(
+            "apps.whatsapp.services.configurar_instancia.ProviderEvolution"
+        ) as provider,
+        patch(
+            "apps.whatsapp.services.validar_webhook.gerar_token_webhook",
+            return_value="token-fixo",
+        ),
+    ):
+        conectar_instancia(
+            empresa=empresa,
+            ator=ator,
+            correlacao="conecta-webhook",
+        )
+
+    provider.return_value.conectar.assert_called_once_with(
+        "http://web:8000/api/v1/webhooks/evolution/"
+        "11111111-1111-1111-1111-111111111111/token-fixo/"
+    )
+    provider.return_value.configurar_webhook.assert_not_called()
 
 
 @pytest.mark.django_db

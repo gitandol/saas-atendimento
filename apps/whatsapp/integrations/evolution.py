@@ -296,8 +296,24 @@ class ProviderEvolution:
             )
         return identificador
 
-    def conectar(self) -> None:
-        """Cria a instancia e solicita a geracao de QR Code."""
+    def configurar_webhook(self, url: str) -> None:
+        """Entrega novas mensagens ao endpoint autenticado da empresa."""
+        self._requisitar(
+            "POST",
+            "webhook/set/{instancia}",
+            json={
+                "webhook": {
+                    "enabled": True,
+                    "url": url,
+                    "webhookByEvents": False,
+                    "webhookBase64": False,
+                    "events": ["MESSAGES_UPSERT"],
+                }
+            },
+        )
+
+    def conectar(self, url_webhook: str) -> None:
+        """Cria a instancia com QR Code e webhook no mesmo request."""
         self._requisitar(
             "POST",
             "instance/create",
@@ -305,6 +321,13 @@ class ProviderEvolution:
                 "instanceName": self.nome_instancia,
                 "qrcode": True,
                 "integration": "WHATSAPP-BAILEYS",
+                "webhook": {
+                    "enabled": True,
+                    "url": url_webhook,
+                    "byEvents": False,
+                    "base64": False,
+                    "events": ["MESSAGES_UPSERT"],
+                },
             },
         )
 

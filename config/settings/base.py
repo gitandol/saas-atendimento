@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "")
 DEBUG = False
 ALLOWED_HOSTS = [
     host.strip()
-    for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,web").split(",")
     if host.strip()
 ]
 CSRF_TRUSTED_ORIGINS = [
@@ -130,6 +130,9 @@ LOGIN_URL = "/admin/login/"
 IA_CHAVE_CRIPTOGRAFIA = os.getenv("IA_CHAVE_CRIPTOGRAFIA", "")
 EVOLUTION_INTERNAL_URL = os.getenv(
     "EVOLUTION_INTERNAL_URL", "http://evolution:8080"
+).rstrip("/")
+EVOLUTION_WEBHOOK_BASE_URL = os.getenv(
+    "EVOLUTION_WEBHOOK_BASE_URL", "http://web:8000"
 ).rstrip("/")
 WHATSAPP_HOSTS_INTERNOS_PERMITIDOS = frozenset(
     host.strip().rstrip(".").lower()

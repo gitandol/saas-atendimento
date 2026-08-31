@@ -34,8 +34,15 @@ class ProviderIAFalso:
 class ProviderWhatsAppFalso:
     """Substitui somente a fronteira externa Evolution."""
 
-    def conectar(self) -> None:
-        """Simula a inicializacao remota da instancia."""
+    webhook_url = ""
+
+    def conectar(self, url_webhook: str) -> None:
+        """Simula a criacao remota com webhook atomico."""
+        self.webhook_url = url_webhook
+
+    def configurar_webhook(self, url: str) -> None:
+        """Registra a URL que receberia os eventos externos."""
+        self.webhook_url = url
 
     def enviar_texto(self, numero: str, texto: str, chave_idempotencia: str) -> str:
         """Simula entrega externa e devolve identificador opaco."""
@@ -188,6 +195,9 @@ def test_fluxo_completo_de_atendimento(
 
     token_webhook = gerar_token_webhook(empresa_id=empresa.id)
     rota_webhook = f"/api/v1/webhooks/evolution/{empresa.id}/{token_webhook}/"
+    assert provider_whatsapp.webhook_url == (
+        f"{settings.EVOLUTION_WEBHOOK_BASE_URL}{rota_webhook}"
+    )
     entrada_cliente = "conteudo-cliente-privado"
     with patch(
         "apps.whatsapp.services.receber_webhook.responder_conversa.delay"

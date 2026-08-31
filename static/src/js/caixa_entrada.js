@@ -32,6 +32,17 @@
     return submitter?.dataset?.acaoConversa || null;
   }
 
+  /** Define no botao a rota que o HTMX resolve no momento da submissao. */
+  function prepararAcaoConversa(botao, conversaId) {
+    const acao = acaoDoSubmit(botao);
+    if (!botao || !conversaId || !acao) return false;
+    botao.setAttribute(
+      "formaction",
+      `/api/v1/atendimento/conversas/${conversaId}/${acao}`,
+    );
+    return true;
+  }
+
   /** Deriva acoes e permissao manual sem depender do DOM. */
   function estadoDosControles({
     modo,
@@ -59,6 +70,7 @@
   if (typeof module !== "undefined" && module.exports) {
     module.exports = {
       acaoDoSubmit,
+      prepararAcaoConversa,
       calcularScrollPreservado,
       deveRolarAoFim,
       estadoDosControles,
@@ -214,14 +226,7 @@
       evento.stopImmediatePropagation();
       return;
     }
-    const acoes = botao.closest("#acoes-conversa");
-    acoes.setAttribute(
-      "hx-post",
-      "/api/v1/atendimento/conversas/" +
-        conversaAtiva +
-        "/" +
-        botao.dataset.acaoConversa,
-    );
+    prepararAcaoConversa(botao, conversaAtiva);
   }, true);
 
   document.body.addEventListener("submit", (evento) => {

@@ -10,6 +10,20 @@
   color: var(--cor-alerta);
 }
 
+.conteudo-caixa {
+  display: flex;
+  width: 100%;
+  max-width: none;
+  height: calc(100dvh - 4.5rem);
+  margin-inline: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.conteudo-caixa .cabecalho-caixa {
+  flex: none;
+}
+
 .caixa-entrada {
   display: grid;
   min-height: min(70vh, 48rem);
@@ -19,6 +33,11 @@
   border-radius: 1rem;
   background: var(--cor-superficie);
   box-shadow: var(--sombra);
+}
+
+.conteudo-caixa .caixa-entrada {
+  min-height: 0;
+  flex: 1;
 }
 
 .painel-caixa {
@@ -37,6 +56,11 @@
   display: flex;
   min-height: 0;
   flex-direction: column;
+}
+
+.painel-lista,
+.painel-historico {
+  overflow: hidden;
 }
 
 .filtros-conversas {
@@ -65,6 +89,8 @@
 }
 
 .lista-conversas {
+  min-height: 0;
+  flex: 1;
   overflow-y: auto;
 }
 
@@ -140,9 +166,47 @@
   font-size: 0.82rem;
 }
 
+.acoes-conversa {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.acoes-conversa input {
+  width: 8rem;
+  min-width: 0;
+}
+
+.acao-conversa-badge {
+  flex: none;
+  min-height: 2.25rem;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid currentColor;
+  border-radius: 0.55rem;
+  background: var(--cor-superficie);
+  font-weight: 750;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.acao-conversa-assumir {
+  color: var(--cor-sucesso);
+  background: color-mix(in srgb, var(--cor-sucesso) 12%, var(--cor-superficie));
+}
+
+.acao-conversa-finalizar {
+  color: var(--cor-perigo);
+  background: color-mix(in srgb, var(--cor-perigo) 12%, var(--cor-superficie));
+}
+
+.acao-conversa-badge:hover {
+  background: color-mix(in srgb, currentColor 18%, var(--cor-superficie));
+}
+
 .historico-conversa {
   display: flex;
-  min-height: 20rem;
+  min-height: 0;
   flex: 1;
   flex-direction: column;
   gap: 0.65rem;
@@ -270,12 +334,28 @@
 
   .caixa-entrada {
     display: block;
-    min-height: calc(100vh - 11rem);
+    min-height: 0;
   }
 
   .painel-caixa {
-    min-height: calc(100vh - 11rem);
+    height: 100%;
+    min-height: 0;
     border-right: 0;
+  }
+
+  .cabecalho-conversa {
+    flex-wrap: wrap;
+  }
+
+  .acoes-conversa {
+    width: 100%;
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+
+  .acoes-conversa input {
+    width: 100%;
+    flex: 1 1 100%;
   }
 
   .painel-caixa:not([data-painel-ativo]) {

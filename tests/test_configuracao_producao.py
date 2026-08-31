@@ -79,3 +79,26 @@ def test_settings_normalizam_hosts_internos_permitidos() -> None:
 
     assert resultado.returncode == 0
     assert resultado.stdout.strip() == "evolution,outro.interno"
+
+
+def test_settings_padrao_permite_webhook_pela_rede_docker() -> None:
+    """Aceita o hostname minimo usado pela Evolution dentro do Compose."""
+    ambiente = os.environ.copy()
+    ambiente.pop("ALLOWED_HOSTS", None)
+    resultado = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            (
+                "from config.settings.base import ALLOWED_HOSTS; "
+                "print(','.join(ALLOWED_HOSTS))"
+            ),
+        ],
+        check=False,
+        capture_output=True,
+        env=ambiente,
+        text=True,
+    )
+
+    assert resultado.returncode == 0
+    assert resultado.stdout.strip() == "localhost,127.0.0.1,web"

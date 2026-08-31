@@ -374,3 +374,36 @@ def test_falha_na_auditoria_desfaz_mensagem_e_agregados() -> None:
     assert conversa.contagem_nao_lida == 0
     assert contato.primeiro_contato_em is None
     assert contato.ultimo_contato_em is None
+
+
+@pytest.mark.django_db
+def test_marcar_como_lida_bloqueia_apenas_a_conversa(monkeypatch) -> None:
+    """Evita FOR UPDATE nos relacionamentos opcionais carregados por LEFT JOIN."""
+    from django.db.models.query import QuerySet
+
+    from apps.atendimento.services.conversas import marcar_como_lida
+
+    conversa = ConversaFactory(contagem_nao_lida=2)
+    ator = UsuarioFactory()
+    MembroEmpresa.objects.create(
+        empresa=conversa.empresa,
+        usuario=ator,
+        papel=MembroEmpresa.Papel.ATENDENTE,
+    )
+    original = QuerySet.select_for_update
+    argumentos: list[dict] = []
+
+    def registrar_argumentos(self, *args, **kwargs):
+        argumentos.append(kwargs)
+        return original(self, *args, **kwargs)
+
+    monkeypatch.setattr(QuerySet, "select_for_update", registrar_argumentos)
+
+    marcar_como_lida(
+        empresa=conversa.empresa,
+        conversa_id=conversa.id,
+        ator=ator,
+        correlacao="teste-bloqueio-leitura",
+    )
+
+    assert {"of": ("self",)} in argumentos

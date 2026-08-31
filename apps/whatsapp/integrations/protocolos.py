@@ -48,8 +48,12 @@ class ProviderWhatsApp(Protocol):
         """Envia texto uma unica vez conforme a chave informada."""
         ...
 
-    def conectar(self) -> None:
-        """Cria ou inicia a instancia configurada."""
+    def configurar_webhook(self, url: str) -> None:
+        """Atualiza a entrega de eventos de uma instancia existente."""
+        ...
+
+    def conectar(self, url_webhook: str) -> None:
+        """Cria a instancia com a entrega de eventos configurada."""
         ...
 
     def desconectar(self) -> None:

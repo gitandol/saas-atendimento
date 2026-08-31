@@ -5,6 +5,7 @@ const test = require("node:test");
 
 const {
   acaoDoSubmit,
+  prepararAcaoConversa,
   calcularScrollPreservado,
   deveRolarAoFim,
   estadoDosControles,
@@ -98,5 +99,22 @@ test("submit sem botao nao escolhe uma transicao implicitamente", () => {
   assert.equal(
     acaoDoSubmit({dataset: {acaoConversa: "finalizar"}}),
     "finalizar",
+  );
+});
+
+
+test("acao informa sua rota no botao antes da submissao do HTMX", () => {
+  const atributos = new Map();
+  const botao = {
+    dataset: {acaoConversa: "assumir"},
+    setAttribute(nome, valor) {
+      atributos.set(nome, valor);
+    },
+  };
+
+  assert.equal(prepararAcaoConversa(botao, "conversa-1"), true);
+  assert.equal(
+    atributos.get("formaction"),
+    "/api/v1/atendimento/conversas/conversa-1/assumir",
   );
 });

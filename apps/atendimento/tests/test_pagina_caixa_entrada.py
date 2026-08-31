@@ -63,6 +63,23 @@ def test_pagina_shell_tem_tres_areas_htmx_estados_e_ajuda() -> None:
 
 
 @pytest.mark.django_db
+def test_pagina_caixa_aplica_layout_imersivo_e_destaca_acoes() -> None:
+    """Falha se a caixa perder a ocupacao total ou a semantica das acoes."""
+    conversa = ConversaFactory()
+    resposta = _cliente(conversa.empresa).get("/atendimento/caixa-de-entrada/")
+
+    assert resposta.status_code == 200
+    conteudo = resposta.content
+    assert b'class="conteudo-principal conteudo-caixa"' in conteudo
+    assert (
+        b'class="acao-conversa-badge acao-conversa-assumir"' in conteudo
+    )
+    assert (
+        b'class="acao-conversa-badge acao-conversa-finalizar"' in conteudo
+    )
+
+
+@pytest.mark.django_db
 def test_endpoints_htmx_renderizam_parciais_sem_duplicar_contrato() -> None:
     """Falha se HTMX receber JSON bruto em vez das regioes acessiveis."""
     conversa = ConversaFactory(contagem_nao_lida=1)

@@ -8,7 +8,7 @@ services:
       DJANGO_SETTINGS_MODULE: ${DJANGO_SETTINGS_MODULE:-config.settings.desenvolvimento}
       SECRET_KEY: ${SECRET_KEY:-insegura-apenas-para-desenvolvimento}
       IA_CHAVE_CRIPTOGRAFIA: ${IA_CHAVE_CRIPTOGRAFIA:-insegura-apenas-para-desenvolvimento}
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,web}
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost:8000}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       POSTGRES_DB: ${POSTGRES_DB:-atendimento}
@@ -17,6 +17,7 @@ services:
       POSTGRES_HOST: postgres
       REDIS_URL: redis://redis:6379/0
       EVOLUTION_INTERNAL_URL: ${EVOLUTION_INTERNAL_URL:-http://evolution:8080}
+      EVOLUTION_WEBHOOK_BASE_URL: ${EVOLUTION_WEBHOOK_BASE_URL:-http://web:8000}
       WHATSAPP_HOSTS_INTERNOS_PERMITIDOS: ${WHATSAPP_HOSTS_INTERNOS_PERMITIDOS:-evolution}
     ports:
       - "8000:8000"
@@ -40,7 +41,7 @@ services:
       DJANGO_SETTINGS_MODULE: ${DJANGO_SETTINGS_MODULE:-config.settings.desenvolvimento}
       SECRET_KEY: ${SECRET_KEY:-insegura-apenas-para-desenvolvimento}
       IA_CHAVE_CRIPTOGRAFIA: ${IA_CHAVE_CRIPTOGRAFIA:-insegura-apenas-para-desenvolvimento}
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,web}
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost:8000}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       POSTGRES_DB: ${POSTGRES_DB:-atendimento}
@@ -49,6 +50,7 @@ services:
       POSTGRES_HOST: postgres
       REDIS_URL: redis://redis:6379/0
       EVOLUTION_INTERNAL_URL: ${EVOLUTION_INTERNAL_URL:-http://evolution:8080}
+      EVOLUTION_WEBHOOK_BASE_URL: ${EVOLUTION_WEBHOOK_BASE_URL:-http://web:8000}
       WHATSAPP_HOSTS_INTERNOS_PERMITIDOS: ${WHATSAPP_HOSTS_INTERNOS_PERMITIDOS:-evolution}
     depends_on:
       postgres:
@@ -96,6 +98,8 @@ services:
       SERVER_TYPE: http
       SERVER_PORT: 8080
       SERVER_URL: ${EVOLUTION_INTERNAL_URL:-http://evolution:8080}
+      LOG_LEVEL: ${EVOLUTION_LOG_LEVEL:-ERROR,WARN}
+      LOG_COLOR: "false"
       AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY:-evolution-local-api-key}
       DATABASE_PROVIDER: postgresql
       # Credenciais interpoladas devem usar o alfabeto URL-safe documentado no .env.example.

@@ -29,14 +29,14 @@
     <option value="IA">IA</option>
     <option value="HUMANO">Humano</option>
   </select>
-  <button type="submit" data-acao-conversa="assumir"
+  <button class="acao-conversa-badge acao-conversa-assumir" type="submit" data-acao-conversa="assumir"
     {% if conversa.estado != "ABERTA" or conversa.modo != "IA" %}hidden{% endif %}
   >Assumir conversa</button>
   <button type="submit" data-acao-conversa="devolver-para-ia"
     data-confirmacao="Deseja devolver esta conversa para a IA?"
     {% if conversa.estado != "ABERTA" or conversa.modo != "HUMANO" %}hidden{% endif %}
   >Devolver para IA</button>
-  <button type="submit" data-acao-conversa="finalizar"
+  <button class="acao-conversa-badge acao-conversa-finalizar" type="submit" data-acao-conversa="finalizar"
     data-confirmacao="Deseja finalizar esta conversa?"
     {% if conversa.estado != "ABERTA" %}hidden{% endif %}
   >Finalizar</button>

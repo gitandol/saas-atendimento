@@ -51,7 +51,7 @@ def marcar_como_lida(
     """Zera nao lidas de uma conversa autorizada e registra a alteracao."""
     autorizar_membro(empresa=empresa, ator=ator)
     conversa = (
-        Conversa.objects.select_for_update()
+        Conversa.objects.select_for_update(of=("self",))
         .select_related("contato", "atendente", "ultima_mensagem")
         .get(pk=conversa_id, empresa=empresa)
     )

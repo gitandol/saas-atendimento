@@ -24,6 +24,7 @@ from apps.whatsapp.integrations.protocolos import (
     ProviderWhatsApp,
 )
 from apps.whatsapp.models import ConfiguracaoWhatsApp
+from apps.whatsapp.services import validar_webhook
 from apps.whatsapp.services.criptografia import (
     ChaveCriptografadaInvalida,
     criptografar_chave,
@@ -286,6 +287,15 @@ def _registrar_estado(
     return _publicar(configuracao)
 
 
+def _url_webhook(empresa: Empresa) -> str:
+    """Monta a rota interna sem persistir ou registrar o token HMAC."""
+    token = validar_webhook.gerar_token_webhook(empresa_id=empresa.id)
+    return (
+        f"{settings.EVOLUTION_WEBHOOK_BASE_URL}/api/v1/webhooks/evolution/"
+        f"{empresa.id}/{token}/"
+    )
+
+
 @transaction.atomic
 def conectar_instancia(
     *, empresa: Empresa, ator: Usuario, correlacao: str
@@ -297,7 +307,8 @@ def conectar_instancia(
     )
     if configuracao is None:
         raise InstanciaWhatsAppNaoEncontrada("Configure uma instancia de WhatsApp.")
-    _obter_provider(empresa).conectar()
+    provider = _obter_provider(empresa)
+    provider.conectar(_url_webhook(empresa))
     return _registrar_estado(
         configuracao=configuracao,
         empresa=empresa,

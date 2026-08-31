@@ -19,7 +19,7 @@
       <div class="area-principal">
         {% include "componentes/barra_superior.html" %}
         {% include "componentes/alertas.html" %}
-        <main id="conteudo-principal" class="conteudo-principal conteudo-limitado" tabindex="-1">
+        <main id="conteudo-principal" class="conteudo-principal {% block classe_conteudo %}conteudo-limitado{% endblock %}" tabindex="-1">
           {% block conteudo %}{% endblock %}
         </main>
       </div>

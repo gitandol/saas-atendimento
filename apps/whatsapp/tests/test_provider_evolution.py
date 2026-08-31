@@ -387,6 +387,59 @@ def test_provider_envia_texto_com_chave_de_idempotencia() -> None:
     UUID(chamada["headers"]["X-Correlation-ID"])
 
 
+def test_provider_configura_webhook_de_mensagens_recebidas() -> None:
+    """Cadastra a URL unica sem sufixar o evento ao caminho autenticado."""
+    provider = _provider(RespostaHTTPFalsa(200, {}, content=b"{}"))
+
+    provider.configurar_webhook(
+        "https://atendimento.example.com/api/v1/webhooks/evolution/"
+        "11111111-1111-1111-1111-111111111111/token-seguro/"
+    )
+
+    chamada = provider.cliente.chamadas[0]
+    assert chamada["metodo"] == "POST"
+    assert chamada["url"] == ("https://evolution.example.com/webhook/set/empresa-1")
+    assert chamada["json"] == {
+        "webhook": {
+            "enabled": True,
+            "url": (
+                "https://atendimento.example.com/api/v1/webhooks/evolution/"
+                "11111111-1111-1111-1111-111111111111/token-seguro/"
+            ),
+            "webhookByEvents": False,
+            "webhookBase64": False,
+            "events": ["MESSAGES_UPSERT"],
+        }
+    }
+
+
+def test_provider_cria_instancia_com_webhook_no_mesmo_request() -> None:
+    """Evita deixar a instancia criada sem entrega de mensagens configurada."""
+    provider = _provider(RespostaHTTPFalsa(200, {}, content=b"{}"))
+    url_webhook = (
+        "https://atendimento.example.com/api/v1/webhooks/evolution/"
+        "11111111-1111-1111-1111-111111111111/token-seguro/"
+    )
+
+    provider.conectar(url_webhook)
+
+    chamada = provider.cliente.chamadas[0]
+    assert chamada["metodo"] == "POST"
+    assert chamada["url"] == "https://evolution.example.com/instance/create"
+    assert chamada["json"] == {
+        "instanceName": "empresa-1",
+        "qrcode": True,
+        "integration": "WHATSAPP-BAILEYS",
+        "webhook": {
+            "enabled": True,
+            "url": url_webhook,
+            "byEvents": False,
+            "base64": False,
+            "events": ["MESSAGES_UPSERT"],
+        },
+    }
+
+
 def test_provider_classifica_400_como_falha_permanente() -> None:
     """Falha se erro de requisicao do cliente entrar na politica de retry."""
     from apps.whatsapp.integrations.protocolos import RequisicaoWhatsAppInvalida
