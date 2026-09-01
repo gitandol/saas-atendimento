@@ -26,14 +26,19 @@ def _configuracao(*, ativa: bool = True) -> ConfiguracaoWhatsApp:
     )
 
 
-def _payload(*, identificador: str = "mensagem-1", from_me: bool = False):
+def _payload(
+    *,
+    identificador: str = "mensagem-1",
+    from_me: bool = False,
+    remote_jid: str = "5568999991234@s.whatsapp.net",
+):
     """Monta uma mensagem textual realista da Evolution."""
     return {
         "event": "messages.upsert",
         "data": {
             "key": {
                 "id": identificador,
-                "remoteJid": "5568999991234@s.whatsapp.net",
+                "remoteJid": remote_jid,
                 "fromMe": from_me,
             },
             "pushName": "Cliente",
@@ -122,6 +127,31 @@ def test_saida_da_instancia_e_persistida_sem_enfileirar_resposta() -> None:
     assert mensagem.direcao == Mensagem.Direcao.SAIDA
     assert mensagem.autor == Mensagem.Autor.SISTEMA
     assert mensagem.status == Mensagem.Status.ENVIADA
+    delay.assert_not_called()
+
+
+@pytest.mark.django_db
+def test_grupo_nao_cria_atendimento_nem_enfileira_resposta() -> None:
+    """Mantem mensagens de grupo fora do dominio de atendimento direto."""
+    from apps.whatsapp.services.receber_webhook import receber_webhook
+
+    configuracao = _configuracao()
+    with patch(
+        "apps.whatsapp.services.receber_webhook.responder_conversa.delay"
+    ) as delay:
+        resultado = receber_webhook(
+            empresa_id=EMPRESA_ID,
+            token=TOKEN_VALIDO,
+            payload=_payload(remote_jid="120363123456789012@g.us"),
+            correlacao="corr-grupo",
+        )
+
+    assert resultado.criado is False
+    assert resultado.mensagem_id is None
+    assert resultado.enfileirado is False
+    assert Contato.objects.filter(empresa=configuracao.empresa).count() == 0
+    assert Conversa.objects.filter(empresa=configuracao.empresa).count() == 0
+    assert Mensagem.objects.filter(empresa=configuracao.empresa).count() == 0
     delay.assert_not_called()
 
 

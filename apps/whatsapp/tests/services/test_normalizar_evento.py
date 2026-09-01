@@ -83,6 +83,29 @@ def test_ignora_evento_desconhecido_e_mensagem_sem_texto() -> None:
     assert midia is None
 
 
+def test_ignora_mensagem_textual_de_grupo() -> None:
+    """Impede que um JID de grupo seja tratado como contato direto."""
+    from apps.whatsapp.services.normalizar_evento import normalizar_evento
+
+    evento = normalizar_evento(
+        {
+            "event": "messages.upsert",
+            "data": {
+                "key": {
+                    "id": "grupo-1",
+                    "remoteJid": "120363123456789012@g.us",
+                    "fromMe": False,
+                },
+                "pushName": "Participante",
+                "message": {"conversation": "Mensagem enviada no grupo"},
+                "messageTimestamp": 1_725_192_000,
+            },
+        }
+    )
+
+    assert evento is None
+
+
 def test_recusa_mensagem_textual_sem_identificador_ou_remetente() -> None:
     """Nao permite que dados incompletos alcancem a persistencia idempotente."""
     import pytest

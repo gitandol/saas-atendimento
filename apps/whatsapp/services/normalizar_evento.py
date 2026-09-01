@@ -78,6 +78,9 @@ def normalizar_evento(
     if not isinstance(jid, str) or not jid.strip():
         raise EventoEvolutionInvalido("Remetente ausente.")
     identificador = identificador.strip()
+    jid = jid.strip()
+    if jid.lower().endswith("@g.us"):
+        return None
     numero = jid.split("@", maxsplit=1)[0].split(":", maxsplit=1)[0].strip()
     nome = dados.get("pushName", "")
     nome = nome.strip() if isinstance(nome, str) else ""
