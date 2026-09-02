@@ -82,7 +82,7 @@ def test_pagina_caixa_aplica_layout_imersivo_e_destaca_acoes() -> None:
 @pytest.mark.django_db
 def test_endpoints_htmx_renderizam_parciais_sem_duplicar_contrato() -> None:
     """Falha se HTMX receber JSON bruto em vez das regioes acessiveis."""
-    conversa = ConversaFactory(contagem_nao_lida=1)
+    conversa = ConversaFactory(contagem_nao_lida=1, contagem_nao_respondida=2)
     mensagem = MensagemFactory(
         conversa=conversa,
         empresa=conversa.empresa,
@@ -104,6 +104,7 @@ def test_endpoints_htmx_renderizam_parciais_sem_duplicar_contrato() -> None:
     assert lista.status_code == 200
     assert b'data-conversa-id="' + str(conversa.id).encode() + b'"' in lista.content
     assert b"data-abrir-conversa" in lista.content
+    assert b"2 mensagens nao respondidas" in lista.content
     assert historico.status_code == 200
     assert b'data-mensagem-id="' + str(mensagem.id).encode() + b'"' in historico.content
     assert b"/api/v1/whatsapp/mensagens/" in historico.content

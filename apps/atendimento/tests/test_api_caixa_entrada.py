@@ -59,6 +59,7 @@ def test_lista_conversas_publica_contrato_ordenado_e_filtrado() -> None:
         ),
         modo=Conversa.Modo.HUMANO,
         contagem_nao_lida=2,
+        contagem_nao_respondida=4,
     )
     ultima = MensagemFactory(
         empresa=empresa,
@@ -86,6 +87,7 @@ def test_lista_conversas_publica_contrato_ordenado_e_filtrado() -> None:
             "numero": "556899998888",
             "previa": "Mensagem mais recente",
             "nao_lidas": 2,
+            "nao_respondidas": 4,
             "modo": "HUMANO",
             "estado": "ABERTA",
             "atendente": "",
@@ -149,7 +151,7 @@ def test_polling_limitado_nao_pula_a_primeira_mensagem_nova() -> None:
 @pytest.mark.django_db
 def test_marcar_lida_exige_post_e_zera_apenas_conversa_do_tenant() -> None:
     """Falha se leitura mutar por GET ou atravessar a empresa ativa."""
-    conversa = ConversaFactory(contagem_nao_lida=5)
+    conversa = ConversaFactory(contagem_nao_lida=5, contagem_nao_respondida=3)
     cliente = _cliente_membro(conversa.empresa)
 
     assert (
@@ -167,6 +169,7 @@ def test_marcar_lida_exige_post_e_zera_apenas_conversa_do_tenant() -> None:
     }
     conversa.refresh_from_db()
     assert conversa.contagem_nao_lida == 0
+    assert conversa.contagem_nao_respondida == 3
 
     outra = ConversaFactory(contagem_nao_lida=4)
     assert (

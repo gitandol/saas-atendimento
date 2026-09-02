@@ -1,6 +1,7 @@
 """Orquestra respostas automaticas com elegibilidade e idempotencia."""
 
 import logging
+import re
 from uuid import UUID
 
 from django.db import transaction
@@ -24,6 +25,11 @@ EXCECOES_PROVIDER = (CredencialIAInvalida, IAIndisponivel, LimiteIAExcedido)
 
 class RespostaAutomaticaNaoPermitida(Exception):
     """Indica que o estado atual nao autoriza uma resposta da IA."""
+
+
+def _normalizar_formatacao_whatsapp(texto: str) -> str:
+    """Converte o delimitador de negrito Markdown para o aceito pelo WhatsApp."""
+    return re.sub(r"\*{2,}(\S(?:[^*\n]*?\S)?)\*{2,}", r"*\1*", texto)
 
 
 def _exigir_elegibilidade(
@@ -228,7 +234,7 @@ def gerar_resposta_atendimento(
     try:
         provider = obter_provider(conversa.empresa)
         resposta = provider.gerar_resposta(prompt, configuracao.modelo)
-        texto = resposta.texto.strip()
+        texto = _normalizar_formatacao_whatsapp(resposta.texto.strip())
         if not texto or len(texto) > LIMITE_RESPOSTA:
             raise IAIndisponivel("O provider retornou conteudo fora do limite.")
     except EXCECOES_PROVIDER as erro:

@@ -25,6 +25,7 @@ def conversa_para_dto(conversa: Conversa) -> ConversaDTO:
         atendente_id=conversa.atendente_id,
         ultima_mensagem_id=conversa.ultima_mensagem_id,
         contagem_nao_lida=conversa.contagem_nao_lida,
+        contagem_nao_respondida=conversa.contagem_nao_respondida,
         versao=conversa.versao,
         finalizada_em=conversa.finalizada_em,
         criado_em=conversa.criado_em,
@@ -83,6 +84,7 @@ def snapshot_conversa(conversa: Conversa) -> dict[str, Any]:
             str(conversa.ultima_mensagem_id) if conversa.ultima_mensagem_id else None
         ),
         "contagem_nao_lida": conversa.contagem_nao_lida,
+        "contagem_nao_respondida": conversa.contagem_nao_respondida,
         "versao": conversa.versao,
         "finalizada_em": (
             conversa.finalizada_em.isoformat() if conversa.finalizada_em else None

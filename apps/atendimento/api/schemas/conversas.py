@@ -14,6 +14,7 @@ class ConversaSaidaSchema(Schema):
     numero: str
     previa: str
     nao_lidas: int
+    nao_respondidas: int
     modo: str
     estado: str
     atendente: str

@@ -131,6 +131,7 @@ def test_registrar_entrada_atualiza_conversa_contato_e_e_idempotente() -> None:
     assert Mensagem.objects.filter(empresa=conversa.empresa).count() == 1
     assert conversa.ultima_mensagem_id == primeira.id
     assert conversa.contagem_nao_lida == 1
+    assert conversa.contagem_nao_respondida == 1
     assert contato.primeiro_contato_em == primeira.criado_em
     assert contato.ultimo_contato_em == primeira.criado_em
     assert EventoAuditoria.objects.filter(
@@ -140,11 +141,11 @@ def test_registrar_entrada_atualiza_conversa_contato_e_e_idempotente() -> None:
 
 
 @pytest.mark.django_db
-def test_registrar_saida_atualiza_ultima_mensagem_sem_incrementar_nao_lidas() -> None:
-    """Mantem a contagem de entradas ao registrar uma resposta de saida."""
+def test_registrar_saida_zera_nao_respondidas_e_preserva_nao_lidas() -> None:
+    """Uma resposta resolve as pendencias sem fingir que as entradas foram lidas."""
     from apps.atendimento.services.mensagens import registrar_mensagem
 
-    conversa = ConversaFactory(contagem_nao_lida=3)
+    conversa = ConversaFactory(contagem_nao_lida=3, contagem_nao_respondida=3)
     ator = UsuarioFactory()
     conversa.modo = Conversa.Modo.HUMANO
     conversa.atendente = ator
@@ -165,6 +166,30 @@ def test_registrar_saida_atualiza_ultima_mensagem_sem_incrementar_nao_lidas() ->
     conversa.refresh_from_db()
     assert conversa.ultima_mensagem_id == mensagem.id
     assert conversa.contagem_nao_lida == 3
+    assert conversa.contagem_nao_respondida == 0
+
+
+@pytest.mark.django_db
+def test_saida_operacional_nao_zera_mensagens_pendentes_de_resposta() -> None:
+    """Uma falha interna nao conta como resposta entregue ao cliente."""
+    from apps.atendimento.services.mensagens import registrar_mensagem
+
+    conversa = ConversaFactory(contagem_nao_lida=2, contagem_nao_respondida=2)
+    registrar_mensagem(
+        empresa=conversa.empresa,
+        conversa_id=conversa.id,
+        direcao=Mensagem.Direcao.SAIDA,
+        autor=Mensagem.Autor.SISTEMA,
+        texto="Falha operacional",
+        identificador_externo="falha-contador-1",
+        status=Mensagem.Status.FALHA,
+        ator=None,
+        origem="task_ia",
+        correlacao="falha-contador-1",
+    )
+
+    conversa.refresh_from_db()
+    assert conversa.contagem_nao_respondida == 2
 
 
 @pytest.mark.django_db

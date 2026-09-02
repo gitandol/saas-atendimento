@@ -177,8 +177,16 @@ def registrar_mensagem(
     conversa.ultima_mensagem = mensagem
     if direcao == Mensagem.Direcao.ENTRADA:
         conversa.contagem_nao_lida += 1
+        conversa.contagem_nao_respondida += 1
+    elif autor in {Mensagem.Autor.IA, Mensagem.Autor.ATENDENTE}:
+        conversa.contagem_nao_respondida = 0
     conversa.save(
-        update_fields=("ultima_mensagem", "contagem_nao_lida", "atualizado_em")
+        update_fields=(
+            "ultima_mensagem",
+            "contagem_nao_lida",
+            "contagem_nao_respondida",
+            "atualizado_em",
+        )
     )
 
     antes_contato = snapshot_contato(contato)

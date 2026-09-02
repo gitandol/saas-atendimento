@@ -58,6 +58,7 @@ def consultar_conversas(
                 "numero": conversa.contato.numero_normalizado,
                 "previa": conversa.ultima_mensagem_texto,
                 "nao_lidas": conversa.contagem_nao_lida,
+                "nao_respondidas": conversa.contagem_nao_respondida,
                 "modo": conversa.modo,
                 "estado": conversa.estado,
                 "atendente": conversa.atendente_nome,

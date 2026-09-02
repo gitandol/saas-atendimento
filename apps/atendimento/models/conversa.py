@@ -58,6 +58,7 @@ class Conversa(models.Model):
         related_name="+",
     )
     contagem_nao_lida = models.PositiveIntegerField(default=0)
+    contagem_nao_respondida = models.PositiveIntegerField(default=0)
     versao = models.PositiveIntegerField(default=1)
     finalizada_em = models.DateTimeField(null=True, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)

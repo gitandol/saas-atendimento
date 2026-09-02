@@ -138,6 +138,45 @@ def test_sucesso_persiste_saida_pendente_metricas_e_agenda_apos_commit(
 
 
 @pytest.mark.django_db
+@pytest.mark.parametrize(
+    ("texto_provider", "texto_whatsapp"),
+    [
+        ("O prazo e de **tres dias**.", "O prazo e de *tres dias*."),
+        ("Oferta ***especial***.", "Oferta *especial*."),
+        ("Calcule 2 ** 3.", "Calcule 2 ** 3."),
+    ],
+)
+def test_sucesso_converte_negrito_markdown_para_formato_do_whatsapp(
+    monkeypatch: pytest.MonkeyPatch,
+    texto_provider: str,
+    texto_whatsapp: str,
+) -> None:
+    """Quebra se a resposta enviada mantiver o segundo asterisco visivel."""
+    conversa, entrada, _ = _cenario_ativo()
+    provider = ProviderFalso(
+        RespostaIA(
+            texto=texto_provider,
+            modelo="gpt-teste",
+            tokens_entrada=5,
+            tokens_saida=6,
+        )
+    )
+
+    from apps.ia.services import gerar_resposta_atendimento as modulo
+
+    monkeypatch.setattr(modulo, "obter_provider", lambda empresa: provider)
+    monkeypatch.setattr(modulo, "_solicitar_envio", lambda *args: None)
+
+    mensagem = modulo.gerar_resposta_atendimento(
+        conversa_id=conversa.id,
+        mensagem_entrada_id=entrada.id,
+        correlacao="corr-negrito-whatsapp",
+    )
+
+    assert mensagem.texto == texto_whatsapp
+
+
+@pytest.mark.django_db
 def test_modo_e_rechecado_depois_da_chamada_externa(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
