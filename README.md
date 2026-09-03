@@ -4,16 +4,17 @@ Monolito Django API-first para atendimento automatico e humano, integrado a Open
 
 ## Inicio rapido
 
-Requisitos: Docker Engine com Compose v2 e portas 8000 e 8080 livres.
+Requisitos: Docker Engine com Compose v2 e portas 8010 e 8081 livres.
 
 1. Copie `.env.example` para `.env`.
 2. Troque todos os valores iniciados por `troque-` e mantenha `DJANGO_SETTINGS_MODULE=config.settings.desenvolvimento` no ambiente local.
 3. Execute `docker compose up --build -d`.
 4. Acompanhe `docker compose ps` ate `web`, `worker`, `postgres` e `redis` ficarem saudaveis.
 5. Crie o administrador com `docker compose exec web python manage.py createsuperuser`.
-6. Acesse `http://localhost:8000/entrar/`.
+6. Acesse `http://localhost:8010/entrar/`.
 
-O container web aplica migrations e coleta estaticos antes do Gunicorn. A Evolution API local fica restrita a `127.0.0.1:8080`.
+O container web aplica migrations e coleta estaticos antes do Gunicorn. A Evolution API local fica restrita a `127.0.0.1:8081`.
+As portas do host podem ser alteradas por `APP_HOST_PORT` e `EVOLUTION_HOST_PORT` no arquivo `.env`; ao alterar a porta web, ajuste tambem `CSRF_TRUSTED_ORIGINS`.
 
 ## Producao
 

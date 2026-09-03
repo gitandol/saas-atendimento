@@ -44,6 +44,20 @@ def test_compose_propaga_segredos_e_configuracao_a_web_e_worker() -> None:
         assert ambiente["POSTGRES_HOST"] == "postgres"
 
 
+def test_compose_publica_servicos_em_portas_exclusivas_do_host() -> None:
+    """Evita conflito com os demais ambientes Docker locais."""
+    servicos = _compose()["services"]
+
+    porta_web = servicos["web"]["ports"][0]
+    assert porta_web["published"] == "8010"
+    assert porta_web["target"] == 8000
+
+    porta_evolution = servicos["evolution"]["ports"][0]
+    assert porta_evolution["host_ip"] == "127.0.0.1"
+    assert porta_evolution["published"] == "8081"
+    assert porta_evolution["target"] == 8080
+
+
 def test_env_example_documenta_variaveis_operacionais() -> None:
     """Mantem o contrato de ambiente completo e sem valores vazios."""
     variaveis = {
@@ -58,6 +72,7 @@ def test_env_example_documenta_variaveis_operacionais() -> None:
         "SECRET_KEY",
         "IA_CHAVE_CRIPTOGRAFIA",
         "ALLOWED_HOSTS",
+        "APP_HOST_PORT",
         "CSRF_TRUSTED_ORIGINS",
         "POSTGRES_DB",
         "POSTGRES_USER",
@@ -66,6 +81,7 @@ def test_env_example_documenta_variaveis_operacionais() -> None:
         "POSTGRES_PORT",
         "REDIS_URL",
         "EVOLUTION_API_KEY",
+        "EVOLUTION_HOST_PORT",
         "EVOLUTION_POSTGRES_DB",
         "EVOLUTION_POSTGRES_USER",
         "EVOLUTION_POSTGRES_PASSWORD",

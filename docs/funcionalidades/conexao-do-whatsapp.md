@@ -14,7 +14,7 @@ Use **Desconectar** para encerrar a sessao atual. As acoes de configurar, conect
 
 ## Evolution local
 
-No ambiente Docker do projeto, use `http://evolution:8080` como URL base. A chave API é o valor de `EVOLUTION_API_KEY` do arquivo `.env`. A porta `http://localhost:8080` serve somente para diagnóstico no computador que executa os containers.
+No ambiente Docker do projeto, use `http://evolution:8080` como URL base. A chave API é o valor de `EVOLUTION_API_KEY` do arquivo `.env`. A porta `http://localhost:8081` serve somente para diagnóstico no computador que executa os containers e pode ser alterada por `EVOLUTION_HOST_PORT`.
 
 ## Operacao
 
