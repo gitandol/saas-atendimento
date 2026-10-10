@@ -1,5 +1,6 @@
 services:
   web:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: infra/docker/Dockerfile
@@ -33,6 +34,7 @@ services:
       retries: 5
 
   worker:
+    restart: unless-stopped
     build:
       context: .
       dockerfile: infra/docker/Dockerfile
@@ -64,6 +66,7 @@ services:
       retries: 5
 
   postgres:
+    restart: unless-stopped
     image: postgres:17-alpine
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-atendimento}
@@ -78,6 +81,7 @@ services:
       retries: 10
 
   evolution-postgres:
+    restart: unless-stopped
     image: postgres:15-alpine
     environment:
       POSTGRES_DB: ${EVOLUTION_POSTGRES_DB:-evolution}
@@ -124,6 +128,7 @@ services:
     restart: unless-stopped
 
   redis:
+    restart: unless-stopped
     image: redis:7.4-alpine
     command: redis-server --appendonly yes
     volumes:
